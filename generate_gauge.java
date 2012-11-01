@@ -17,8 +17,6 @@ public class generate_gauge {
 	int N = Global.GROUP ; 
 	int[] shape = {8, 8 ,8 , 8 } ; 
 
-	beta = 6.0 ; 
-	
 	System.out.println("Pure gauge simulation SU(" + N + ")");
 	init() ;
 
@@ -69,17 +67,25 @@ public class generate_gauge {
 		ulinks[i] = new gaugefield(N) ;
 	    }
 
+	/* set starting links to identity matrix */
+	for (iv=0;iv<nlinks;iv++)
+	    ulinks[iv].set_constant(1.0,0.0) ;
+
 	parity=new int[nsites];
 	table1=new gaugefield[vectorlength];
 	table2=new gaugefield[vectorlength];
 	for(i=0 ; i < vectorlength ; ++i)
 	    {
-		table1=new gaugefield(N);
-		table2=new gaugefield(N);
+		table1[i] = new gaugefield(N);
+		table2[i] = new gaugefield(N);
 	    }
 
-	// for (i=0;i<5;i++)
-	// mtemp[i]=new matrix[vectorlength];
+	mtemp =new gaugefield[5];
+	for (i=0;i<5;i++)
+	    mtemp[i]=new gaugefield(vectorlength) ;
+
+	    //	    mtemp[i]=new gaugefield[vectorlength];
+
 
 
 	sold=new double[vectorlength];
@@ -94,9 +100,6 @@ public class generate_gauge {
 	for (i=1;i<DIM;i++)
 	    shift[i]=shift[i-1]*Global.shape[i-1];
 
-	/* set starting links to identity matrix */
-	//  for (iv=0;iv<nlinks;iv++)
-	//  ulinks[iv]=1.0;
 	
 	/* set parity matrix for sites */
 	for (iv=0;iv<nsites;iv++)
@@ -132,8 +135,8 @@ public class generate_gauge {
   for(iv=0;iv<vectorlength;iv++)
       {
 	  /* bias towards the identity */
-	  temporary1.set_constant(beta/GROUP, 0.0);
-	  temporary2.set_constant(beta/GROUP, 0.0) ;
+	  temporary1.set_constant(Global.beta/GROUP, 0.0);
+	  temporary2.set_constant(Global.beta/GROUP, 0.0) ;
 	      for(i=0;i<GROUP;i++)
 		  for(j=0;j<GROUP;j++)
 		      {
@@ -213,20 +216,106 @@ public class generate_gauge {
     public static void vtable() 
     {/* shuffle table 1  into a */
 	/* the random inversion from ranmat is important! */
-	//  ranmat(mtemp[0]);
+	//	ranmat(mtemp[0]);
+	mtemp = ranmat();
+
 	/* multiply table 2 by a into table 1 for trial change */
-	// vprod(table2,mtemp[0],table1);
+	//	table1 =  vprod(table2 , mtemp[0]);
+	table1 =  vprod(table2 , mtemp );
+
 	/* metropolis select new table 2 */
-	// vtrace(table2,sold);
-	// vtrace(table1,snew);
+	sold = vtrace(table2 );
+	snew =  vtrace(table1);
 	// metro(table2,table1,6*beta/GROUP);  
 	/* switch table 1 and 2 */
-	// vcopy(table2,table1);
+	table1 =  vcopy(table2);
 	// vcopy(mtemp[0],table2);
-	// vgroup(table1);
+	table2 = vcopy(mtemp); 
+
+	vgroup(table1);
+
 	return;
     }
-    
+
+
+  /* 
+     set g3 to the matrix product of g1 and g2, vectorlength times 
+  */    
+
+    public static gaugefield[] vcopy(gaugefield[] g1) {
+    gaugefield[] g3 ; 
+    g3 = new gaugefield[vectorlength] ;
+
+    for(int iv=0;iv<vectorlength;iv++)
+	g3[iv]=g1[iv].copy() ;
+
+
+  return g3 ;
+}
+
+  /* 
+     randomly shift table1, randomly invert, and put in g 
+  */
+  public static gaugefield[] ranmat() {
+    gaugefield[] g ; 
+    g = new gaugefield[vectorlength] ;
+
+    Random generator = new Random();
+
+  int iv,index;
+  // index=(int) (vectorlength*drand48());
+  index = generator.nextInt(vectorlength) + 1 ;
+
+  for(iv=0;iv<vectorlength;iv++)
+      {
+	  if (index>=vectorlength) index-=vectorlength;
+
+	  double rr = generator.nextDouble();
+
+	  if( rr < 0.5 )
+	      g[iv]=table1[index].copy() ;
+	  else
+	      g[iv]=table1[index].conjugate();
+
+	  index++;
+      }
+
+  return g;
+}
+
+
+
+  public static double[] vtrace(gaugefield[] g1) {
+    double[] g3 ; 
+    g3 = new double[vectorlength] ;
+
+    for(int iv=0;iv<vectorlength;iv++)
+	g3[iv]=g1[iv].trace_re() ;
+
+
+  return g3 ;
+}
+
+
+
+  /* 
+     set g3 to the matrix product of g1 and g2, vectorlength times 
+  */    
+
+  public static  gaugefield[] vprod(gaugefield[] g1 , gaugefield[] g2) 
+{
+    gaugefield[] g3 ; 
+    g3 = new gaugefield[vectorlength] ;
+
+    for(int iv=0;iv<vectorlength;iv++)
+	g3[iv]=g1[iv].prod(g2[iv]) ;
+
+
+  return g3 ;
+}
+
+
+
 
 
     //
@@ -238,7 +327,6 @@ public class generate_gauge {
     public static int nplaquettes ;
     public static int vectorlength; 
 
-    public double beta ;
 
     public static int[] accepted ;
     public static int[] myindex ;
@@ -254,5 +342,7 @@ public class generate_gauge {
 
     public static gaugefield[] table1 ;
     public static gaugefield[] table2 ;
+
+    public static gaugefield[] mtemp ;
 
 }

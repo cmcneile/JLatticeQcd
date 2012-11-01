@@ -32,19 +32,104 @@ public class gaugefield {
 
 
 
+    public gaugefield  conjugate() 
+    {
+	gaugefield result = new gaugefield(GROUP) ;
+
+	for(int i=0;i<GROUP;i++)
+	    for(int j=0;j<GROUP;j++) 
+		{
+		    result.real[i][j]= real[j][i];
+		    result.imag[i][j]= -imag[j][i];
+		}
+
+
+	return result;
+    }
+
+
     public void set_constant(double re, double im)
     {
 	int i,j;
 	for (i=0;i<GROUP;i++){
 	    for (j=0;j<GROUP;j++){
-		real[i][i] = re ; 
-		imag[i][i] = im ;
+		real[i][j] = re ; 
+		imag[i][j] = im ;
 
 	    }
 	}
 
 
     }
+
+
+
+    public double trace_re()
+    {
+	double ans = 0.0  ;
+
+	int i ;
+	for (i=0;i<GROUP;i++)
+	    ans += imag[i][i]  ;
+
+	return ans ;
+
+    }
+
+
+    public gaugefield copy () {
+	gaugefield X = new gaugefield(GROUP);
+
+	for (int i = 0; i < GROUP ; i++) {
+	    for (int j = 0; j < GROUP  ; j++) {
+		X.real[i][j] = real[i][j] ;
+		X.imag[i][j] = imag[i][j] ;
+	    }
+	}
+	return X;
+    }
+
+
+
+
+    public gaugefield prod (gaugefield Y) {
+	gaugefield X = new gaugefield(GROUP);
+
+	for (int i = 0; i < GROUP ; i++) {
+	    for (int j = 0; j < GROUP  ; j++) {
+		X.real[i][j] = 0.0 ;
+		X.imag[i][j] = 0.0 ;
+
+	    for (int k = 0; k < GROUP  ; k++) {
+		X.real[i][j] += real[i][k] * Y.real[k][j] ;
+		X.real[i][j] -= imag[i][k] * Y.imag[k][j] ;
+
+		X.imag[i][j] += real[i][k] * Y.imag[k][j]  ;
+		X.imag[i][j] += imag[i][k] * Y.real[k][j]  ;
+	    }
+
+
+	    }
+	}
+	return X;
+    }
+
+
+
+
+
+    public gaugefield sub (gaugefield Y) {
+	gaugefield X = new gaugefield(GROUP);
+
+	for (int i = 0; i < GROUP ; i++) {
+	    for (int j = 0; j < GROUP  ; j++) {
+		X.real[i][j] = real[i][j] - Y.real[i][j] ;
+		X.imag[i][j] = imag[i][j] - Y.imag[i][j]  ;
+	    }
+	}
+	return X;
+    }
+
 
 
 
