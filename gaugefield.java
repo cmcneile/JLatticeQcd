@@ -22,6 +22,30 @@ public class gaugefield {
     }
 
 
+    public void project()
+    {
+
+
+
+
+    }
+
+
+
+    public void set_constant(double re, double im)
+    {
+	int i,j;
+	for (i=0;i<GROUP;i++){
+	    for (j=0;j<GROUP;j++){
+		real[i][i] = re ; 
+		imag[i][i] = im ;
+
+	    }
+	}
+
+
+    }
+
 
 
     //    need to return 
@@ -76,8 +100,8 @@ public class gaugefield {
 
 
 
-    private double[][] real ;
-    private double[][] imag ;
+    public double[][] real ;
+    public double[][] imag ;
 
     private int GROUP ;
 
