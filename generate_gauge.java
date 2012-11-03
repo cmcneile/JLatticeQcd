@@ -20,7 +20,6 @@ public class generate_gauge {
 
 	int a , b , c ; 
 	int N = Global.GROUP ; 
-	int[] shape = {8, 8 ,8 , 8 } ; 
 
 	System.out.println("Pure gauge simulation SU(" + N + ")");
 	init() ;
@@ -35,15 +34,24 @@ public class generate_gauge {
 	System.out.println("group=SU(" + N +   " )   beta = " + 
 			   Global.beta);
 	System.out.println("-----------------");
+
+	for (int iv=0;iv<nlinks;iv++)
+	    {
+		System.out.println("Matrix " + iv);
+		ulinks[iv].printmatrix() ;
+	    }
+
+	loop(ulinks,2,2);
+	System.exit(0) ;
     
 
 	/* experiment: standard Monte Carlo updating */
-	System.out.println("test monte");
+	System.out.println("Start Monte Carlo generation of configs");
 	for(int iter=0;iter<5;iter++) 
 	    {
 		int count=0;
 		for (int i=0;i<5;i++) {
-		    monte(ulinks);
+		    //		    monte(ulinks);
 		    count++; 
 		}
 		renorm(ulinks);
@@ -66,13 +74,17 @@ public class generate_gauge {
 
 	System.out.println("Initializing lattice");
 
+	nsites=1;
 	for(i=0;i<DIM;i++){
 	    nsites*=Global.shape[i];
-	    //    if (1 & Global.shape[i]) cleanup(string("bad dimensions"));
+	    //	    if (1 & Global.shape[i]) cleanup(string("bad dimensions"));
 	}
 	nlinks=DIM*nsites;
 	nplaquettes=DIM*(DIM-1)*nsites/2;
 	vectorlength=nsites/2;
+
+	System.out.println("nlinks = " + nlinks );
+	System.out.println("vectorlength = " + vectorlength);
 
 	Random generator = new Random();
 
@@ -89,7 +101,7 @@ public class generate_gauge {
 
 	/* set starting links to identity matrix */
 	for (iv=0;iv<nlinks;iv++)
-	    ulinks[iv].set_constant(1.0,0.0) ;
+	    ulinks[iv].set_unit() ;
 
 	parity=new int[nsites];
 	table1=new gaugefield[vectorlength];
@@ -515,22 +527,37 @@ public static void makeindex(int n,int[] ind){
   return;
 }
 
-    public static int vshift(int n, int[] x){
-  /* shifts site n by vector x */
-  int i ;
-  int[] y = new int[Global.DIM];
 
-  split(y,n);
-  for(i=0;i<Global.DIM;i++){
-    if (x[i] != 0){
-      y[i]+=x[i];
-      while (y[i]>=Global.shape[i])
-	y[i]-=Global.shape[i];
-      while (y[i]<0)
-	y[i]+= Global.shape[i];
-    }
-  }
-  return siteindex(y);
+
+    /**
+     * Shift a site n by vector x
+     *
+     * Longer description. If there were any, it would be    [2]
+     * here.
+     *
+     * @param  n  starting site
+     * @param  x[] shift direction
+     * @return site (integer)
+     */
+
+
+    public static int vshift(int n, int[] x)
+    {
+	int i ;
+	int[] y = new int[Global.DIM];
+	
+	split(y,n);
+	for(i=0;i<Global.DIM;i++){
+	    if (x[i] != 0){
+		y[i]+=x[i];
+		while (y[i]>=Global.shape[i])
+		    y[i]-=Global.shape[i];
+		while (y[i]<0)
+		    y[i]+= Global.shape[i];
+	    }
+	}
+	return siteindex(y);
+
 }
 
 
@@ -540,22 +567,37 @@ public static void makeindex(int n,int[] ind){
     public static int siteindex(int[] x){
 
   int i,result=0;
+
   for (i=0;i<Global.DIM;i++)
-    result+=shift[i]*x[i];
+    result += shift[i]*x[i];
 
   return result;
 }
 
 
 
-    public static int ishift( int n, int dir, int dist){
-  /* returns index of a site shifted dist in direction dir */
-    int i ;
-  int[] x = new int[Global.DIM];
-  for(i=0;i<Global.DIM;i++)
-    x[i]=0;
-  x[dir]=dist;
-  return vshift(n,x);
+    /**
+     * returns index of a site shifted dist in direction dir
+     *
+     * Longer description. If there were any, it would be    [2]
+     * here.
+     *
+     * @param  n
+     * @param  direction   -- direction that the sift is in
+     * @param  dist
+     * @return site (integer)
+     */
+
+    public static int ishift( int n, int dir, int dist)
+    {
+	
+	int i ;
+	int[] x = new int[Global.DIM];
+	for(i=0;i<Global.DIM;i++)
+	    x[i]=0;
+
+	x[dir]=dist;
+	return vshift(n,x);
 }
 
   /* gather same color links into vector g starting at site */
@@ -676,35 +718,39 @@ public static gaugefield[]  savelinks(gaugefield[]  g,int site,int link)
 			corner=ishift(corner,link2,y);
 			for(iv=0;iv<vectorlength;iv++)
 			    {
-				mtemp0[iv].set_constant(1.0,0.0) ;
-				mtemp1[iv].set_constant(1.0,0.0) ;
-				mtemp2[iv].set_constant(1.0,0.0) ;
-				mtemp3[iv].set_constant(1.0,0.0) ;
+				mtemp0[iv].set_unit() ;
+				mtemp1[iv].set_unit() ;
+				mtemp2[iv].set_unit() ;
+				mtemp3[iv].set_unit() ;
 			    }
-			for(i=0;i<x;i++){
-			   mtemp4 =  getlinks(u,ishift(color,link1,i),link1);
-			   mtemp0 = vprod(mtemp0,mtemp4);
-			   mtemp4 = getconjugate(u,ishift(corner,link1,-i-1),link1);
-			   mtemp2 = vprod(mtemp2,mtemp4);
-			}
+			for(i=0;i<x;i++)
+			    {
+				mtemp4 =  getlinks(u,ishift(color,link1,i),link1);
+				mtemp0 = vprod(mtemp0,mtemp4);
+				mtemp4 = getconjugate(u,ishift(corner,link1,-i-1),link1);
+				mtemp2 = vprod(mtemp2,mtemp4);
+			    }
 
-			for(i=0;i<y;i++){
-			    mtemp4 = getlinks(u,ishift(corner,link2,i-y),link2);
-			    mtemp1 = vprod(mtemp1,mtemp4);
-			    mtemp4 = getconjugate(u,ishift(color,link2,y-i-1),link2);
-			    mtemp3 = vprod(mtemp3,mtemp4);
-			}
+			for(i=0;i<y;i++)
+			    {
+				mtemp4 = getlinks(u,ishift(corner,link2,i-y),link2);
+				mtemp1 = vprod(mtemp1,mtemp4);
+				mtemp4 = getconjugate(u,ishift(color,link2,y-i-1),link2);
+				mtemp3 = vprod(mtemp3,mtemp4);
+			    }
 			mtemp0 = vprod(mtemp0,mtemp1);
 			mtemp0 = vprod(mtemp0,mtemp2);
 			sold = vtprod(mtemp0,mtemp3);
 	  
 			for(iv=0;iv<vectorlength;iv++)
 			    result +=sold[iv];
-		    }
+
+		    } // link1 != link2
 		}
 
 	result=result/(Global.GROUP*vectorlength*count);
-	System.out.printf(" %d by %d loop = %g\n",x,y,result);
+
+	System.out.printf("W[%d,%d] = %g\n",x,y,result);
 	return result;
     }
 

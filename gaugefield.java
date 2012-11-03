@@ -26,7 +26,13 @@ public class gaugefield {
     public void project()
     {
 	int i,j,k,nmax;
-	nmax=GROUP-(GROUP<4); /* 2 and 3 are treated specially */
+	//	nmax=GROUP-(GROUP<4); /* 2 and 3 are treated specially */
+
+	if( GROUP<4 )
+	    nmax = GROUP - 1  ;
+	else
+	    nmax = GROUP ;
+
 	/* loop over rows */
 	for (i=0;i<nmax;i++) {
 	    /* normalize i'th row */
@@ -73,7 +79,7 @@ public class gaugefield {
     imag[1][1]= -imag[0][0];
     break;  
   default: /* remove the determinant from the first row */
-    double x,y,w;
+    double x=0.0 , y=0.0 ,w;
     this.determinant(x,y);
     for (i=0;i<GROUP;i++) {
       w=real[0][i]*x
@@ -115,6 +121,24 @@ public class gaugefield {
 	    }
 	}
 
+
+    }
+
+
+
+    public void set_unit()
+    {
+	int i,j;
+	for (i=0;i<GROUP;i++){
+	    for (j=0;j<GROUP;j++){
+		real[i][j] = 0.0 ; 
+		imag[i][j] = 0.0 ;
+
+	    }
+	}
+
+	for (i=0;i<GROUP;i++)
+	    real[i][i] = 1.0 ; 
 
     }
 
