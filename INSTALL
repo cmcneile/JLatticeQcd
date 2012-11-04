@@ -1,0 +1,12 @@
+The build system uses ant (http://ant.apache.org/manual/Tasks/java.html).
+
+The following commands will compile and run the code.
+
+ant compile
+ant jar
+ant run
+
+
+See the file build.xml
+
+
