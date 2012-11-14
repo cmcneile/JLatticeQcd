@@ -86,7 +86,7 @@ public class generate_gauge {
 	System.out.println("nlinks = " + nlinks );
 	System.out.println("vectorlength = " + vectorlength);
 
-	Random generator = new Random();
+	generator = new Random();
 
 
 	// 
@@ -172,7 +172,6 @@ public class generate_gauge {
   //#define forvector for(iv=0;iv<vectorlength;iv++)
   //#define formatrix for(i=0;i<GROUP;i++)for(j=0;j<GROUP;j++)
 
-  Random generator = new Random();
 
   gaugefield temporary1 = new gaugefield(GROUP) ;
   gaugefield temporary2 = new gaugefield(GROUP) ;
@@ -326,7 +325,6 @@ public static gaugefield[] vsum(gaugefield[] g1,gaugefield[] g2) {
     gaugefield[] g ; 
     g = new gaugefield[vectorlength] ;
 
-    Random generator = new Random();
 
   int iv,index;
   // index=(int) (vectorlength*drand48());
@@ -651,7 +649,6 @@ public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int link)
   int iv;
   double expdeltas=0.0,temp;
 
-  Random generator = new Random();
 
   for(iv=0;iv<vectorlength;iv++)
       {
@@ -803,4 +800,6 @@ public static void renorm(gaugefield[]  l)
     public static gaugefield[] mtemp3 ;
     public static gaugefield[] mtemp4 ;
 
+    // Random number generator 
+    private static Random generator ;
 }
