@@ -5,7 +5,7 @@
 
 // http://www.cs.geneseo.edu/~baldwin/reference/random.html
 
-//  more work metro -- need to check the passing of arguments
+
 //
 //
 
@@ -20,6 +20,8 @@ public class generate_gauge {
 
 	int a , b , c ; 
 	int N = Global.GROUP ; 
+	int sweeps_between_meas = 5 ;
+	int max_sweeps = 5 ; 
 
 	System.out.println("Pure gauge simulation SU(" + N + ")");
 	init() ;
@@ -47,10 +49,11 @@ public class generate_gauge {
 
 	/* experiment: standard Monte Carlo updating */
 	System.out.println("Start Monte Carlo generation of configs");
-	for(int iter=0;iter<5;iter++) 
+	for(int iter=0; iter < max_sweeps ; iter++) 
 	    {
 		int count=0;
-		for (int i=0;i<5;i++) {
+		for (int i=0 ; i < sweeps_between_meas ; i++) 
+		    {
 		    //		    monte(ulinks);
 		    count++; 
 		}
@@ -81,6 +84,8 @@ public class generate_gauge {
 	}
 	nlinks=DIM*nsites;
 	nplaquettes=DIM*(DIM-1)*nsites/2;
+
+	// split lattice into even and odd sites
 	vectorlength=nsites/2;
 
 	System.out.println("nlinks = " + nlinks );
@@ -88,13 +93,12 @@ public class generate_gauge {
 
 	generator = new Random();
 
-
 	// 
 	//  reserve memory
 	//  
 
 	 ulinks=new gaugefield[nlinks];
-	for(i=0 ; i < nlinks ; ++i)
+	 for(i=0 ; i < nlinks ; ++i)
 	    {
 		ulinks[i] = new gaugefield(N) ;
 	    }
@@ -106,6 +110,7 @@ public class generate_gauge {
 	parity=new int[nsites];
 	table1=new gaugefield[vectorlength];
 	table2=new gaugefield[vectorlength];
+
 	for(i=0 ; i < vectorlength ; ++i)
 	    {
 		table1[i] = new gaugefield(N);
@@ -151,59 +156,68 @@ public class generate_gauge {
 	    {
 		split(x,iv);
 		parity[iv]=0;
+
 		for (i=0;i<DIM;i++)
 		parity[iv] ^= x[i];
+
 		parity[iv] &= 1;
 	    }
 
-  maketable();
-  System.out.println("initialization done\n");
+	maketable();
+	System.out.println("initialization done\n");
   
 
     }
 
 
+/**
+ * Generate tables of vectorlength random matrices 
+ *
+ *
+ */
+    public static void maketable()
+    {
 
-    public static void maketable(){
-  /* generate tables of vectorlength random matrices */
-  int i,j,iv;
-  int GROUP = Global.GROUP ;
+	int i,j,iv;
+	int GROUP = Global.GROUP ;
 
-  //#define forvector for(iv=0;iv<vectorlength;iv++)
-  //#define formatrix for(i=0;i<GROUP;i++)for(j=0;j<GROUP;j++)
+	//#define forvector for(iv=0;iv<vectorlength;iv++)
+	//#define formatrix for(i=0;i<GROUP;i++)for(j=0;j<GROUP;j++)
 
 
-  gaugefield temporary1 = new gaugefield(GROUP) ;
-  gaugefield temporary2 = new gaugefield(GROUP) ;
+	gaugefield temporary1 = new gaugefield(GROUP) ;
+	gaugefield temporary2 = new gaugefield(GROUP) ;
+	
+	for(iv=0;iv<vectorlength;iv++)
+	    {
+		/* bias towards the identity */
+		temporary1.set_constant(Global.beta/GROUP, 0.0);
+		temporary2.set_constant(Global.beta/GROUP, 0.0) ;
+		for(i=0;i<GROUP;i++)
+		    for(j=0;j<GROUP;j++)
+			{
+			    temporary1.real[i][j] += 
+				generator.nextDouble() -0.5;
+			    temporary1.imag[i][j] += 
+				generator.nextDouble() -0.5;
+			    temporary2.real[i][j] += 
+				generator.nextDouble() -0.5;
+			    temporary2.imag[i][j] += 
+				generator.nextDouble() -0.5;
+			} 
+		table1[iv]=temporary1;
+		table2[iv]=temporary2;
+	    }
+	/* make into group elements */
+	vgroup(table1);
+	vgroup(table2);
+	
+	/* update table a few times */
+	for (i=0;i<50;i++)
+	    vtable();
 
-  for(iv=0;iv<vectorlength;iv++)
-      {
-	  /* bias towards the identity */
-	  temporary1.set_constant(Global.beta/GROUP, 0.0);
-	  temporary2.set_constant(Global.beta/GROUP, 0.0) ;
-	      for(i=0;i<GROUP;i++)
-		  for(j=0;j<GROUP;j++)
-		      {
-			  temporary1.real[i][j] += 
-			      generator.nextDouble() -0.5;
-			  temporary1.imag[i][j] += 
-			      generator.nextDouble() -0.5;
-			  temporary2.real[i][j] += 
-			      generator.nextDouble() -0.5;
-			  temporary2.imag[i][j] += 
-			      generator.nextDouble() -0.5;
-		      } 
-	  table1[iv]=temporary1;
-	  table2[iv]=temporary2;
-      }
-  /* make into group elements */
-  vgroup(table1);
-  vgroup(table2);
-  /* update table a few times */
-  for (i=0;i<50;i++)
-    vtable();
-  return;
-}
+	return;
+    }
 
     /* 
        subroutine to make group elements out of 
@@ -271,6 +285,7 @@ public class generate_gauge {
 	sold = vtrace(table2 );
 	snew =  vtrace(table1);
 	metro(table2,table1,6*Global.beta/Global.GROUP);  
+
 	/* switch table 1 and 2 */
 	table1 =  vcopy(table2);
 	table2 = vcopy(mtemp0); 
@@ -285,67 +300,67 @@ public class generate_gauge {
      set g3 to the matrix product of g1 and g2, vectorlength times 
   */    
 
-    public static gaugefield[] vcopy(gaugefield[] g1) {
-    gaugefield[] g3 ; 
-    g3 = new gaugefield[vectorlength] ;
-
-    for(int iv=0;iv<vectorlength;iv++)
-	g3[iv]=g1[iv].copy() ;
-
-
-  return g3 ;
-}
+    public static gaugefield[] vcopy(gaugefield[] g1) 
+    {
+	gaugefield[] g3 ; 
+	g3 = new gaugefield[vectorlength] ;
+	
+	for(int iv=0;iv<vectorlength;iv++)
+	    g3[iv]=g1[iv].copy() ;
+	
+	return g3 ;
+    }
 
   /* matrix sum of g1 and g2 to g3, vectorlength times */
-public static gaugefield[] vsum(gaugefield[] g1,gaugefield[] g2) {
-    gaugefield[] g3 ;
-    g3 = new gaugefield[vectorlength] ;
+    public static gaugefield[] vsum(gaugefield[] g1,gaugefield[] g2) 
+    {
+	gaugefield[] g3 ;
+	g3 = new gaugefield[vectorlength] ;
+	
 
+	int i,j,iv;
+	/*   slightly faster writing this out over:
+	     forvector
+	     g3[iv]=g1[iv]+g2[iv];
+	*/  
+	for(i=0;i<Global.GROUP;i++)
+	    for(j=0;j<Global.GROUP;j++)
+		for(iv=0;iv<vectorlength;iv++) {
+		    g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
+		    g3[iv].imag[i][j]=g1[iv].imag[i][j]+g2[iv].imag[i][j];
+		}
 
-    int i,j,iv;
-    /*   slightly faster writing this out over:
-       forvector
-       g3[iv]=g1[iv]+g2[iv];
-    */  
-    for(i=0;i<Global.GROUP;i++)
-	for(j=0;j<Global.GROUP;j++)
-	    for(iv=0;iv<vectorlength;iv++) {
-		g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
-		g3[iv].imag[i][j]=g1[iv].imag[i][j]+g2[iv].imag[i][j];
-  }
-
-  return g3 ; 
-}
+	return g3 ; 
+    }
 
 
   /* 
      randomly shift table1, randomly invert, and put in g 
   */
-  public static gaugefield[] ranmat() {
-    gaugefield[] g ; 
-    g = new gaugefield[vectorlength] ;
+  public static gaugefield[] ranmat() 
+    {
+	gaugefield[] g ; 
+	g = new gaugefield[vectorlength] ;
 
+	// index=(int) (vectorlength*drand48());
+	int index = generator.nextInt(vectorlength) + 1 ;
 
-  int iv,index;
-  // index=(int) (vectorlength*drand48());
-  index = generator.nextInt(vectorlength) + 1 ;
+	for(int iv=0;iv<vectorlength;iv++)
+	    {
+		if (index>=vectorlength) index-=vectorlength;
+		
+		double rr = generator.nextDouble();
+		
+		if( rr < 0.5 )
+		    g[iv]=table1[index].copy() ;
+		else
+		    g[iv]=table1[index].conjugate();
 
-  for(iv=0;iv<vectorlength;iv++)
-      {
-	  if (index>=vectorlength) index-=vectorlength;
-
-	  double rr = generator.nextDouble();
-
-	  if( rr < 0.5 )
-	      g[iv]=table1[index].copy() ;
-	  else
-	      g[iv]=table1[index].conjugate();
-
-	  index++;
-      }
-
-  return g;
-}
+		index++;
+	    }
+	
+	return g;
+    }
 
 
 
@@ -619,22 +634,21 @@ public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int link)
 
     public static double[] vtprod(gaugefield[] g1, gaugefield[] g2)
 {
-  int i,j,iv;
-  double[] s = new double[vectorlength] ;
+    double[] s = new double[vectorlength] ;
 
-  for(iv=0;iv<vectorlength;iv++)
-      s[iv]=0.0;
+    for(int iv=0;iv<vectorlength;iv++)
+	s[iv]=0.0;
 
 
-  for(iv=0;iv<vectorlength;iv++)
-      for(i=0;i<Global.GROUP;i++)
-	  for(j=0;j<Global.GROUP;j++)
-	      s[iv]+=g1[iv].real[i][j]*g2[iv].real[j][i]
-		  -g1[iv].imag[i][j]*g2[iv].imag[j][i];   
-
-  return s ;
+    for(int iv=0;iv<vectorlength;iv++)
+	for(int i=0;i<Global.GROUP;i++)
+	    for(int j=0;j<Global.GROUP;j++)
+		s[iv]+=g1[iv].real[i][j]*g2[iv].real[j][i]
+		    -g1[iv].imag[i][j]*g2[iv].imag[j][i];   
+    
+    return s ;
 }
-
+    
 
   /* accept new for old using metropolis algorithm
      return average exponential of action change, this should fluctuate
@@ -644,53 +658,63 @@ public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int link)
      actions passed in global variables sold and snew */
 
 
- public static double metro(gaugefield[] old,gaugefield[] trial,double bias) 
-{
-  int iv;
-  double expdeltas=0.0,temp;
+    public static double metro(gaugefield[] old,gaugefield[] trial,double bias) 
+    {
+	int iv;
+	double expdeltas=0.0,temp;
+	
+
+	for(iv=0;iv<vectorlength;iv++)
+	    {
+		temp=  Math.exp((bias*(snew[iv]-sold[iv])));
+		expdeltas=expdeltas+temp;
+		
+		// this is a big hack from the c++ cpde
+		if(generator.nextDouble()  < temp)
+		    accepted[iv] = 1 ;
+		else
+		    accepted[iv] = 0 ;
+		
+	    }
+	/* Accept changes */
+
+	for(iv=0;iv<vectorlength;iv++)
+	    if (accepted[iv] != 0 ) 
+		{
+		    sold[iv]=snew[iv];
+		    old[iv]=trial[iv];
+		}
 
 
-  for(iv=0;iv<vectorlength;iv++)
-      {
-	  temp=  Math.exp((bias*(snew[iv]-sold[iv])));
-	  expdeltas=expdeltas+temp;
-
-	  // this is a big hack from the c++ cpde
-	  if(generator.nextDouble()  < temp)
-	      accepted[iv] = 1 ;
-	  else
-	      accepted[iv] = 0 ;
-
-      }
-  /* Accept changes */
-
-  for(iv=0;iv<vectorlength;iv++)
-      if (accepted[iv] != 0 ) {
-	  sold[iv]=snew[iv];
-	  old[iv]=trial[iv];
-    }
   return expdeltas/vectorlength;
 }   
 
 
   /* scatter alternate links from vector g */
 
-public static gaugefield[]  savelinks(gaugefield[]  g,int site,int link)
+public static gaugefield[] savelinks(gaugefield[]  g,int site,int link)
 {
     gaugefield[] lattice = new gaugefield[vectorlength] ;
 
-    int iv,shift;
     makeindex(site,myindex);
-    shift=nsites*link;
+    int shift=nsites*link;
 
-  for(iv=0;iv<vectorlength;iv++)
+    for(int iv=0;iv<vectorlength;iv++)
       lattice[myindex[iv]+shift] = g[iv].copy();
 
-  return lattice ;
+    return lattice ;
 }
 
 
-    /* calculate rectangular wilson loops */
+/**
+ * calculate rectangular wilson loops 
+ *
+ * Compute Wilson loop with size x * y
+ *
+ * @param gaugefield -- gauge configuration
+ * @param x -- one dimension of Wilson loop
+ * @param y -- the other dimension of Wilson loop
+ */
     public static double loop(gaugefield[] u, int x, int y)
     {
 	int i,color,link1,link2,iv,corner,count=0;
@@ -751,8 +775,16 @@ public static gaugefield[]  savelinks(gaugefield[]  g,int site,int link)
 	return result;
     }
 
-  /* project whole lattice into group; call from time to time 
-     to keep down drift from floating point errors */
+/**
+ * Reunitarise gauge configuratiom.
+ *
+ * project whole lattice into group; call from time to time 
+ *    to keep down drift from floating point errors 
+ *
+ *
+ * @param  gaugefield -- gauge configuration
+ *
+ */
 
 
 public static void renorm(gaugefield[]  l) 
