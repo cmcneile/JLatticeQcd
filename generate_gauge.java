@@ -1,5 +1,5 @@
 //
-//  Port Creutz's code to java
+//  Port of Mike Creutz's C++ code to java
 //
 //
 
@@ -68,6 +68,12 @@ public class generate_gauge {
     }
 
 
+
+
+/**
+ * Reserve memory and initialize mapping arrays.
+ *
+ */
     public static void init()
     {
 	int DIM = Global.DIM ; 
@@ -134,13 +140,11 @@ public class generate_gauge {
 	    }
 
 
-	    //	    mtemp[i]=new gaugefield[vectorlength];
-
-
-
 	sold=new double[vectorlength];
 	snew=new double[vectorlength];
+
 	accepted=new int[vectorlength];
+
 	myindex=new int[vectorlength];
 	myindex2=new int[vectorlength];
 
@@ -200,6 +204,7 @@ public class generate_gauge {
 				generator.nextDouble() -0.5;
 			    temporary1.imag[i][j] += 
 				generator.nextDouble() -0.5;
+
 			    temporary2.real[i][j] += 
 				generator.nextDouble() -0.5;
 			    temporary2.imag[i][j] += 
@@ -273,12 +278,10 @@ public class generate_gauge {
     /* update matrix table */
     public static void vtable() 
     {/* shuffle table 1  into a */
-	/* the random inversion from ranmat is important! */
-	//	ranmat(mtemp[0]);
+
 	mtemp0 = ranmat();
 
 	/* multiply table 2 by a into table 1 for trial change */
-	//	table1 =  vprod(table2 , mtemp[0]);
 	table1 =  vprod(table2 , mtemp0 );
 
 	/* metropolis select new table 2 */
@@ -336,6 +339,8 @@ public class generate_gauge {
 
   /* 
      randomly shift table1, randomly invert, and put in g 
+     This is a vector operation so maybe better name.
+     
   */
   public static gaugefield[] ranmat() 
     {
@@ -344,6 +349,8 @@ public class generate_gauge {
 
 	// index=(int) (vectorlength*drand48());
 	int index = generator.nextInt(vectorlength) + 1 ;
+
+	/* the random inversion from ranmat is important! */
 
 	for(int iv=0;iv<vectorlength;iv++)
 	    {
@@ -364,16 +371,17 @@ public class generate_gauge {
 
 
 
-  public static double[] vtrace(gaugefield[] g1) {
-    double[] g3 ; 
-    g3 = new double[vectorlength] ;
+    public static double[] vtrace(gaugefield[] g1) 
+    {
+	double[] g3 ; 
+	g3 = new double[vectorlength] ;
+	
+	for(int iv=0;iv<vectorlength;iv++)
+	    g3[iv]=g1[iv].trace_re() ;
+    
 
-    for(int iv=0;iv<vectorlength;iv++)
-	g3[iv]=g1[iv].trace_re() ;
-
-
-  return g3 ;
-}
+	return g3 ;
+    }
 
 
 
@@ -381,17 +389,17 @@ public class generate_gauge {
      set g3 to the matrix product of g1 and g2, vectorlength times 
   */    
 
-  public static  gaugefield[] vprod(gaugefield[] g1 , gaugefield[] g2) 
-{
-    gaugefield[] g3 ; 
-    g3 = new gaugefield[vectorlength] ;
+    public static  gaugefield[] vprod(gaugefield[] g1 , gaugefield[] g2) 
+    {
+	gaugefield[] g3 ; 
+	g3 = new gaugefield[vectorlength] ;
+	
+	for(int iv=0;iv<vectorlength;iv++)
+	    g3[iv]=g1[iv].prod(g2[iv]) ;
+	
 
-    for(int iv=0;iv<vectorlength;iv++)
-	g3[iv]=g1[iv].prod(g2[iv]) ;
-
-
-  return g3 ;
-}
+	return g3 ;
+    }
 
 
     /* the basic metropolis update */
