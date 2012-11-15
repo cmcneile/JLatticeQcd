@@ -28,7 +28,7 @@ public class generate_gauge {
 
 	System.out.printf("lattice size %d " ,  Global.shape[0] );
 	for (int i=1;i< Global.DIM;i++)
-	    System.out.printf(" by %d ", Global.shape[i]);
+	    System.out.printf("x%d ", Global.shape[i]);
 
 	System.out.printf("\n");
 
@@ -37,14 +37,14 @@ public class generate_gauge {
 			   Global.beta);
 	System.out.println("-----------------");
 
-	for (int iv=0;iv<nlinks;iv++)
-	    {
-		System.out.println("Matrix " + iv);
-		ulinks[iv].printmatrix() ;
-	    }
+	//	for (int iv=0;iv<nlinks;iv++)
+	//    {
+	//	System.out.println("Matrix " + iv);
+	//	ulinks[iv].printmatrix() ;
+	//    }
 
 	loop(ulinks,2,2);
-	System.exit(0) ;
+	// System.exit(0) ;
     
 
 	/* experiment: standard Monte Carlo updating */
@@ -54,9 +54,9 @@ public class generate_gauge {
 		int count=0;
 		for (int i=0 ; i < sweeps_between_meas ; i++) 
 		    {
-		    //		    monte(ulinks);
-		    count++; 
-		}
+			monte(ulinks);
+			count++; 
+		    }
 		renorm(ulinks);
 		loop(ulinks,2,2);
 	    } 
@@ -213,6 +213,7 @@ public class generate_gauge {
 		table1[iv]=temporary1;
 		table2[iv]=temporary2;
 	    }
+
 	/* make into group elements */
 	vgroup(table1);
 	vgroup(table2);
@@ -321,17 +322,17 @@ public class generate_gauge {
 	g3 = new gaugefield[vectorlength] ;
 	
 
-	int i,j,iv;
 	/*   slightly faster writing this out over:
 	     forvector
 	     g3[iv]=g1[iv]+g2[iv];
 	*/  
-	for(i=0;i<Global.GROUP;i++)
-	    for(j=0;j<Global.GROUP;j++)
-		for(iv=0;iv<vectorlength;iv++) {
-		    g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
-		    g3[iv].imag[i][j]=g1[iv].imag[i][j]+g2[iv].imag[i][j];
-		}
+	for(int i=0;i<Global.GROUP;i++)
+	    for(int j=0;j<Global.GROUP;j++)
+		for(int iv=0;iv<vectorlength;iv++) 
+		    {
+			g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
+			g3[iv].imag[i][j]=g1[iv].imag[i][j]+g2[iv].imag[i][j];
+		    }
 
 	return g3 ; 
     }
@@ -418,34 +419,37 @@ public class generate_gauge {
 	iacc=0;
 	/* loop over checkerboard colors */
 
-	for (color=0;color<2;color++) {
-	    /* loop over link dirs */
-	    for (link=0;link<DIM;link++) {
-		/* get neighborhood */
-		mtemp4 = staple(lattice,color,link); 
-		/* get old link and calculate action */
-		mtemp0 = getlinks(lattice,color,link);
-		sold = vtprod(mtemp0,mtemp4);
-		/* loop over hits */
-		for (hit=0;hit<HITS;hit++) {
-		    /* get random matrices */
-		    mtemp1 = ranmat() ;
+	for (color=0;color<2;color++) 
+	    {
+		/* loop over link dirs */
+		for (link=0;link<DIM;link++) 
+		    {
+			/* get neighborhood */
+			mtemp4 = staple(lattice,color,link); 
+			/* get old link and calculate action */
+			mtemp0 = getlinks(lattice,color,link);
+			sold = vtprod(mtemp0,mtemp4);
+			/* loop over hits */
+			for (hit=0;hit<HITS;hit++) {
+			    /* get random matrices */
+			    mtemp1 = ranmat() ;
 
-		    /* find trial element and new action */
-		    mtemp2 = vprod(mtemp0,mtemp1);
-		    snew = vtprod(mtemp2,mtemp4);
-		    eds += metro(mtemp0,mtemp2,
-				 Global.beta/(1.*Global.GROUP)); 
+			    /* find trial element and new action */
+			    mtemp2 = vprod(mtemp0,mtemp1);
+			    snew = vtprod(mtemp2,mtemp4);
+			    eds += metro(mtemp0,mtemp2,
+					 Global.beta/(1.*Global.GROUP)); 
 
-		    /* metropolis step */
-		    for(iv=0;iv<vectorlength;iv++) {
-			iacc=iacc+accepted[iv];
-			stot=stot+sold[iv];
-		    }  
-		}
-		lattice = savelinks(mtemp0,color,link); 
+			    /* metropolis step */
+			    for(iv=0;iv<vectorlength;iv++) {
+				iacc=iacc+accepted[iv];
+				stot=stot+sold[iv];
+			    }  
+			}
+			lattice = savelinks(mtemp0,color,link); 
+		    }
 	    }
-	}
+
 	stot=stot/(.5*DIM*(DIM-1)*nlinks*GROUP*HITS);
 	acc=iacc/(1.*nlinks*HITS);
 	eds=eds/(2.*DIM*HITS);
@@ -485,27 +489,29 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
       st[iv] = new gaugefield(Global.GROUP)  ;
 
   site1=ishift(site,link,1);
+
   /* loop over planes */
   for (link1=0;link1<Global.DIM;link1++)
-    if (link1!=link) {
-      site2=ishift(site ,link1, 1);
-      site4=ishift(site1,link1,-1);
-      site5=ishift(site ,link1,-1);
-      /* top of staple */
-      mtemp0 = getlinks(lat,site1,link1);
-      mtemp1 = getconjugate(lat,site2,link);
-      mtemp2 = vprod(mtemp0,mtemp1);
-      mtemp0 = getconjugate(lat,site,link1);
-      mtemp1 = vprod(mtemp2,mtemp0);
-      st = vsum(st,mtemp1);
-      /* bottom of staple */
-      mtemp0 = getconjugate(lat,site4,link1);
-      mtemp1 = getconjugate(lat,site5,link );
-      mtemp2 = vprod(mtemp0,mtemp1);
-      mtemp0 = getlinks(lat,site5,link1);
-      mtemp1 = vprod(mtemp2,mtemp0);
-      st = vsum(st,mtemp1);
-    }
+    if (link1!=link) 
+	{
+	    site2=ishift(site ,link1, 1);
+	    site4=ishift(site1,link1,-1);
+	    site5=ishift(site ,link1,-1);
+	    /* top of staple */
+	    mtemp0 = getlinks(lat,site1,link1);
+	    mtemp1 = getconjugate(lat,site2,link);
+	    mtemp2 = vprod(mtemp0,mtemp1);
+	    mtemp0 = getconjugate(lat,site,link1);
+	    mtemp1 = vprod(mtemp2,mtemp0);
+	    st = vsum(st,mtemp1);
+	    /* bottom of staple */
+	    mtemp0 = getconjugate(lat,site4,link1);
+	    mtemp1 = getconjugate(lat,site5,link );
+	    mtemp2 = vprod(mtemp0,mtemp1);
+	    mtemp0 = getlinks(lat,site5,link1);
+	    mtemp1 = vprod(mtemp2,mtemp0);
+	    st = vsum(st,mtemp1);
+	}
 
 
   return st ;
@@ -524,37 +530,44 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	    g[iv]=lat[myindex[iv]+shift].conjugate();
 
 
-  return g ;
-}
-
-    /* generates a set of site labels starting at n for gathering links */
-    /* loop over even parity sites and gather with shift n from them */
+	return g ;
+    }
 
 
-public static void makeindex(int n,int[] ind){
+/**
+ * Short one line description.                           (1)
+ *
+ * generates a set of site labels starting at n for gathering links
+ * loop over even parity sites and gather with shift n from them 
+ *
+ * @param  n    -- 
+ * @param  ind[] --
+ */
 
-  int iv,site;
-  int[] x = new int[Global.DIM] ;
 
-  split(x,n);
-  site=0;
+    public static void makeindex(int n,int[] ind)
+    {
 
-  for(iv=0;iv<vectorlength;iv++)
-      {
-    while (parity[site] != 0 ) site++;
-    ind[iv]=vshift(site,x);
-    site++;
-  }
-  return;
-}
+	int iv,site;
+	int[] x = new int[Global.DIM] ;
+
+	split(x,n);
+	site=0;
+
+	for(iv=0;iv<vectorlength;iv++)
+	    {
+		while (parity[site] != 0 ) site++;
+		ind[iv]=vshift(site,x);
+		site++;
+	    }
+	return;
+    }
 
 
 
     /**
      * Shift a site n by vector x
      *
-     * Longer description. If there were any, it would be    [2]
-     * here.
      *
      * @param  n  starting site
      * @param  x[] shift direction
@@ -582,18 +595,25 @@ public static void makeindex(int n,int[] ind){
 }
 
 
-  /* utilities for implementing periodic boundaries */
+   
 
-  /* gives a unique index to site located at x[DIM] */
-    public static int siteindex(int[] x){
+    /**
+     * Gives a unique index to site located at x[DIM] *
+     *
+     *
+     * @param  x[] -- lattice coordinates
+     * @return int -- site index
+     */
+    public static int siteindex(int[] x)
+    {
 
-  int i,result=0;
+	int result=0;
 
-  for (i=0;i<Global.DIM;i++)
-    result += shift[i]*x[i];
+	for(int i=0;i<Global.DIM;i++)
+	    result += shift[i]*x[i];
 
-  return result;
-}
+	return result;
+    }
 
 
 
