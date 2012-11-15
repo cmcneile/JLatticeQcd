@@ -545,7 +545,17 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 }
 
 
-    /* gather conjugate links into vector g */
+/**
+ * gather conjugate links into vector g 
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+ * @param  int link -- direction
+ * @param  int site
+ * @param  gaugefield[] lat
+ * @return gaugefield[vectorlength]
+ */
     public static gaugefield[] getconjugate(gaugefield[] lat,int site,int link)
     {
 	gaugefield[] g = new gaugefield[vectorlength] ; 
@@ -603,8 +613,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
      * @param  x[] shift direction
      * @return site (integer)
      */
-
-
     public static int vshift(int n, int[] x)
     {
 	int i ;
@@ -704,7 +712,18 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	return g ;
     }
 
-/* real trace of product g1 and g2 to s, vectorlength times */
+
+
+/**
+ * real trace of product g1 and g2 to s, vectorlength times 
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+ * @param  gaugefield[] g2 --
+ * @param  gaugefield[] g1 -- 
+ * @return double []       --
+ */
 
     public static double[] vtprod(gaugefield[] g1, gaugefield[] g2)
     {
@@ -724,12 +743,25 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
     }
     
 
-  /* accept new for old using metropolis algorithm
-     return average exponential of action change, this should fluctuate
-     about unity when in equilibrium
-     bias multiplies actions in exponential (i.e. beta/N)  
-     accepted changes returned in accepted
-     actions passed in global variables sold and snew */
+
+
+
+/**
+ * Short one line description.                           (1)
+ *
+ * accept new for old using metropolis algorithm
+ * return average exponential of action change, this should fluctuate
+ * about unity when in equilibrium
+ * bias multiplies actions in exponential (i.e. beta/N)  
+ * accepted changes returned in accepted
+ *     actions passed in global variables sold and snew 
+ *
+ * @param  double bias        --
+ * @param  gaugefield[] trial --
+ * @param  gaugefield[] old   --
+ * @return double 
+ */
+
 
 
     public static double metro(gaugefield[] old,gaugefield[] trial,double bias) 
