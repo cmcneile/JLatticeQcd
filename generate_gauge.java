@@ -19,9 +19,10 @@ public class generate_gauge {
     {
 
 	int a , b , c ; 
-	int N = Global.GROUP ; 
 	int sweeps_between_meas = 5 ;
 	int max_sweeps = 5 ; 
+
+	N = Global.GROUP ; 
 
 	System.out.println("Pure gauge simulation SU(" + N + ")");
 	init() ;
@@ -79,7 +80,6 @@ public class generate_gauge {
 	int DIM = Global.DIM ; 
 	int i , iv ;
 	int[] x = new int[DIM] ;
-	int N = Global.GROUP ; 
 
 	System.out.println("Initializing lattice");
 
@@ -189,16 +189,16 @@ public class generate_gauge {
 	//#define formatrix for(i=0;i<GROUP;i++)for(j=0;j<GROUP;j++)
 
 
-	gaugefield temporary1 = new gaugefield(GROUP) ;
-	gaugefield temporary2 = new gaugefield(GROUP) ;
+	gaugefield temporary1 = new gaugefield(N) ;
+	gaugefield temporary2 = new gaugefield(N) ;
 	
 	for(iv=0;iv<vectorlength;iv++)
 	    {
 		/* bias towards the identity */
-		temporary1.set_constant(Global.beta/GROUP, 0.0);
-		temporary2.set_constant(Global.beta/GROUP, 0.0) ;
-		for(i=0;i<GROUP;i++)
-		    for(j=0;j<GROUP;j++)
+		temporary1.set_constant(Global.beta/N, 0.0);
+		temporary2.set_constant(Global.beta/N, 0.0) ;
+		for(i=0; i < N ; i++)
+		    for(j=0; j < N ; j++)
 			{
 			    temporary1.real[i][j] += 
 				generator.nextDouble() -0.5;
@@ -288,7 +288,7 @@ public class generate_gauge {
 	/* metropolis select new table 2 */
 	sold = vtrace(table2 );
 	snew =  vtrace(table1);
-	metro(table2,table1,6*Global.beta/Global.GROUP);  
+	metro(table2,table1,6*Global.beta/N);  
 
 	/* switch table 1 and 2 */
 	table1 =  vcopy(table2);
@@ -308,7 +308,12 @@ public class generate_gauge {
     {
 	gaugefield[] g3 ; 
 	g3 = new gaugefield[vectorlength] ;
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g3[i] = new gaugefield(N);
+	    }	
 	
+
 	for(int iv=0;iv<vectorlength;iv++)
 	    g3[iv]=g1[iv].copy() ;
 	
@@ -320,14 +325,17 @@ public class generate_gauge {
     {
 	gaugefield[] g3 ;
 	g3 = new gaugefield[vectorlength] ;
-	
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g3[i] = new gaugefield(N);
+	    }	
 
 	/*   slightly faster writing this out over:
 	     forvector
 	     g3[iv]=g1[iv]+g2[iv];
 	*/  
-	for(int i=0;i<Global.GROUP;i++)
-	    for(int j=0;j<Global.GROUP;j++)
+	for(int i=0;i< N;i++)
+	    for(int j=0;j< N;j++)
 		for(int iv=0;iv<vectorlength;iv++) 
 		    {
 			g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
@@ -347,6 +355,11 @@ public class generate_gauge {
     {
 	gaugefield[] g ; 
 	g = new gaugefield[vectorlength] ;
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g[i] = new gaugefield(N);
+	    }	
+
 
 	// index=(int) (vectorlength*drand48());
 	int index = generator.nextInt(vectorlength) + 1 ;
@@ -376,7 +389,7 @@ public class generate_gauge {
     {
 	double[] g3 ; 
 	g3 = new double[vectorlength] ;
-	
+
 	for(int iv=0;iv<vectorlength;iv++)
 	    g3[iv]=g1[iv].trace_re() ;
     
@@ -394,6 +407,12 @@ public class generate_gauge {
     {
 	gaugefield[] g3 ; 
 	g3 = new gaugefield[vectorlength] ;
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g3[i] = new gaugefield(N);
+	    }	
+
+
 	
 	for(int iv=0;iv<vectorlength;iv++)
 	    g3[iv]=g1[iv].prod(g2[iv]) ;
@@ -408,7 +427,7 @@ public class generate_gauge {
     {
 	int DIM = Global.DIM ;
 	int HITS = Global.HITS ;
-	int GROUP = Global.GROUP ;
+	//	int GROUP = Global.GROUP ;
 	
 	double stot,acc,eds;
 	int iv,iacc,color,link,hit;
@@ -438,7 +457,7 @@ public class generate_gauge {
 			    mtemp2 = vprod(mtemp0,mtemp1);
 			    snew = vtprod(mtemp2,mtemp4);
 			    eds += metro(mtemp0,mtemp2,
-					 Global.beta/(1.*Global.GROUP)); 
+					 Global.beta/(1.*N)); 
 
 			    /* metropolis step */
 			    for(iv=0;iv<vectorlength;iv++) {
@@ -450,7 +469,7 @@ public class generate_gauge {
 		    }
 	    }
 
-	stot=stot/(.5*DIM*(DIM-1)*nlinks*GROUP*HITS);
+	stot=stot/(.5*DIM*(DIM-1)*nlinks*N*HITS);
 	acc=iacc/(1.*nlinks*HITS);
 	eds=eds/(2.*DIM*HITS);
 
@@ -484,9 +503,14 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
   gaugefield[] st ; // MoreWork need to reserve memory
 
   st = new gaugefield[vectorlength] ; 
+  for(int i=0 ; i < vectorlength ; ++i)
+      {
+	  st[i] = new gaugefield(N);
+      }	
+
 
   for(iv=0;iv<vectorlength;iv++)
-      st[iv] = new gaugefield(Global.GROUP)  ;
+      st[iv] = new gaugefield(N)  ;
 
   site1=ishift(site,link,1);
 
@@ -522,11 +546,16 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
     public static gaugefield[] getconjugate(gaugefield[] lat,int site,int link)
     {
 	gaugefield[] g = new gaugefield[vectorlength] ; 
-	int iv,shift;
-	makeindex(site,myindex);
-	shift=nsites*link;
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g[i] = new gaugefield(N);
+	    }	
 
-	for(iv=0;iv<vectorlength;iv++)
+
+	makeindex(site,myindex);
+	int shift=nsites*link;
+
+	for(int iv=0;iv<vectorlength;iv++)
 	    g[iv]=lat[myindex[iv]+shift].conjugate();
 
 
@@ -669,8 +698,8 @@ public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int link)
 
 
     for(int iv=0;iv<vectorlength;iv++)
-	for(int i=0;i<Global.GROUP;i++)
-	    for(int j=0;j<Global.GROUP;j++)
+	for(int i=0;i<N;i++)
+	    for(int j=0;j<N;j++)
 		s[iv]+=g1[iv].real[i][j]*g2[iv].real[j][i]
 		    -g1[iv].imag[i][j]*g2[iv].imag[j][i];   
     
@@ -681,7 +710,7 @@ public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int link)
   /* accept new for old using metropolis algorithm
      return average exponential of action change, this should fluctuate
      about unity when in equilibrium
-     bias multiplies actions in exponential (i.e. beta/GROUP)  
+     bias multiplies actions in exponential (i.e. beta/N)  
      accepted changes returned in accepted
      actions passed in global variables sold and snew */
 
@@ -797,7 +826,7 @@ public static gaugefield[] savelinks(gaugefield[]  g,int site,int link)
 		    } // link1 != link2
 		}
 
-	result=result/(Global.GROUP*vectorlength*count);
+	result=result/(N*vectorlength*count);
 
 	System.out.printf("W[%d,%d] = %g\n",x,y,result);
 	return result;
@@ -832,6 +861,8 @@ public static void renorm(gaugefield[]  l)
     //
     // variables in the class
     //
+
+    public static int N ;
 
     public static int nsites ;
     public static int nlinks ; 
