@@ -1,7 +1,7 @@
 /**
  * @author      Craig McNeile
  * @version     0.5      
- * @since       2012-11-16  
+ * @since       2012-11-1
  */
 
 public class gaugefield 
@@ -227,7 +227,7 @@ public class gaugefield
 				Tim -= real[i][k] * imag[k][j]  ;
 				Tim += imag[i][k] * real[k][j]  ;
 			    }
-			System.out.printf("UU^dagger[%d,%d] = (%g, %g)   ",i,j, Tim, Tim);
+			System.out.printf("UU^dagger[%d,%d] = (%g, %g) \n",i,j, Tre, Tim);
 	    }
 	}
     }

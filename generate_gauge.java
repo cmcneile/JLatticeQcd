@@ -1,7 +1,13 @@
-//
-//  Port of Mike Creutz's C++ code to java
-//
-//
+/**
+ * @author      Craig McNeile
+ * @version     0.5      
+ * @since       2012-11-1
+ *
+ *  This is a rewrite of a C++ code written by Mike Creutz.
+ *
+ */
+
+
 
 // http://www.cs.geneseo.edu/~baldwin/reference/random.html
 
@@ -33,18 +39,18 @@ public class generate_gauge {
 
 	System.out.printf("\n");
 
-	System.out.println("group=SU(" + N +   " )   beta = " + 
+	System.out.println("Gauge group=SU(" + N +   ")   beta = " + 
 			   Global.beta);
 	System.out.println("-----------------");
 
-	//	for (int iv=0;iv<nlinks;iv++)
-	//    {
-	//	System.out.println("Matrix " + iv);
-	//	ulinks[iv].printmatrix() ;
-	//    }
+	//	dump_matrix(ulinks, nlinks); 
+	// System.exit(0) ;
 
 	loop(ulinks,1,1);
-	// System.exit(0) ;
+	
+
+	check_unitarity(ulinks) ;
+	System.exit(0) ;
     
 
 	/* Standard Monte Carlo updating */
@@ -382,6 +388,17 @@ public class generate_gauge {
 
 
 
+/**
+ * At each vector position compute the trace of gaugefield
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+
+ * @param  gaugefield[vectorlength] g1
+ * @return double[vectorlength]          -- trace of gaugefields
+ */
+
     public static double[] vtrace(gaugefield[] g1) 
     {
 	double[] g3 ; 
@@ -396,9 +413,45 @@ public class generate_gauge {
 
 
 
+
+
+/**
+ * Write to standard output the matrices of gauge field
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+
+ * @param  gaugefield[vectorlength] g1
+ * @return double[vectorlength]          -- trace of gaugefields
+ */
+
+    public static void dump_matrix(gaugefield[] g, int dim) 
+    {
+	for(int iv=0; iv < dim ;iv++)
+	    {
+		System.out.println("Matrix " + iv);
+		g[iv].printmatrix() ;
+	    }
+    }
+
+
+
   /* 
-     set g3 to the matrix product of g1 and g2, vectorlength times 
+
   */    
+
+/**
+ *    set g3 to the matrix product of g1 and g2, vectorlength times 
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+ * @param  gaugefield[vectorlength] g2
+ * @param  gaugefield[vectorlength] g1
+ * @return double[vectorlength]          -- g3 = g1 + g2
+ */
+
 
     public static  gaugefield[] vprod(gaugefield[] g1 , gaugefield[] g2) 
     {
@@ -408,12 +461,9 @@ public class generate_gauge {
 	    {
 		g3[i] = new gaugefield(N);
 	    }	
-
-
 	
 	for(int iv=0;iv<vectorlength;iv++)
 	    g3[iv]=g1[iv].prod(g2[iv]) ;
-	
 
 	return g3 ;
     }
@@ -473,6 +523,38 @@ public class generate_gauge {
 		int link=octant*vectorlength;
 		for(int iv=0;iv<vectorlength;iv++)
 		    l[link+iv].project();
+	    }
+	return;
+    }
+
+
+
+
+
+    /**
+     * Check that the gauge configuration is uniarity
+     *
+     *
+     *
+     * @param  gaugefield[nlinks] -- gauge configuration
+     *
+     */
+    
+
+    public static void check_unitarity(gaugefield[]  l) 
+    { 
+	/* loop over lattice octants. The 2 is for 
+	   two parities.
+	 */
+	for (int octant=0;octant<2*Global.DIM;octant++) 
+	    {
+		int link=octant*vectorlength;
+		for(int iv=0;iv<vectorlength;iv++)
+		    {
+			System.out.printf("Position[%d,%d]\n" ,link, iv   );
+			l[link+iv].check_unitarity();
+		    }
+
 	    }
 	return;
     }

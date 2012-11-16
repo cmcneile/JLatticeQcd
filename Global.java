@@ -22,11 +22,10 @@ public class Global {
 
     /**
      * Dimension of the lattice
+       Each dimension should be even
+
      */
     public static int[] shape = {2 ,2 ,2 ,2 } ;
-
-    /* other shapes are allowed but 
-       each dimension must be even for checkerboarding */
 
 
     public static int HITS = 10 ;
