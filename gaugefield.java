@@ -39,65 +39,84 @@ public class gaugefield
 	    nmax = N ;
 
 	/* loop over rows */
-	for (i=0;i<nmax;i++) {
-	    /* normalize i'th row */
-	    double temp=real[i][0] * real[i][0]
-		+ imag[i][0]*imag[i][0];
-	    for (j=1;j<N;j++)
-		temp+= real[i][j]*real[i][j]
-		    +imag[i][j]*imag[i][j];
-	    temp=1/Math.sqrt(temp);   
-	    for (j=0;j<N;j++) {
-		real[i][j]*=temp;
-		imag[i][j]*=temp;
-	    }
-	    /* orthogonalize remaining rows */
-	    double adotbr,adotbi;
-	    for (k=i+1;k<nmax;k++) {
-      adotbr=real[i][0]*real[k][0]
-	+imag[i][0]*imag[k][0];
-      adotbi= real[i][0]*imag[k][0]
-	-imag[i][0]*real[k][0];
-      for (j=1;j<N;j++) {
-	adotbr+=real[i][j]*real[k][j]
-	  + imag[i][j]* imag[k][j];
-	adotbi+= real[i][j]*imag[k][j]
-	  -imag[i][j]*real[k][j];
-      }
-      for (j=0;j<N;j++) {
-	real[k][j]-=adotbr* real[i][j]
-	  -adotbi*imag[i][j];
-	imag[k][j]-= adotbr*imag[i][j]
-	  +adotbi* real[i][j];
-      } 
-    } /* end of k loop */
-  } /* end of i loop */
-    /* remove determinant, treating group=2 or 3 as special cases */
+	for (i=0 ; i<nmax; i++) 
+	    {
+		/* normalize i'th row */
+		double temp = real[i][0] * real[i][0]
+		            + imag[i][0] * imag[i][0];
 
-  switch (N) {
-  case 3:
-    thirdrow();
-    break; 
-  case 2: /* for su(2) */
-    real[1][0]= -real[0][1];
-    real[1][1]=  real[0][0];
-    imag[1][0]=  imag[0][1];
-    imag[1][1]= -imag[0][0];
-    break;  
-  default: /* remove the determinant from the first row */
-    double x=0.0 , y=0.0 ,w;
-    this.determinant(x,y);
-    for (i=0;i<N;i++) {
-      w=real[0][i]*x
-	+ imag[0][i]*y;
-      imag[0][i]= imag[0][i]*x
-	- real[0][i]*y;
-      real[0][i]=w;
+		for (j=1;j<N;j++)
+		    temp += real[i][j]*real[i][j]
+			+  imag[i][j]*imag[i][j];
+
+		temp=1/Math.sqrt(temp);   
+
+		for (j=0;j<N;j++) 
+		    {
+			real[i][j] *= temp;
+			imag[i][j] *= temp;
+		    }
+
+		/* orthogonalize remaining rows */
+
+		double adotbr,adotbi;
+		for (k=i+1;k<nmax;k++) 
+		    {
+			adotbr=real[i][0]*real[k][0]
+			    +imag[i][0]*imag[k][0];
+
+			adotbi= real[i][0]*imag[k][0]
+			    -imag[i][0]*real[k][0];
+
+			for (j=1;j<N;j++) 
+			    {
+				adotbr+=real[i][j]*real[k][j]
+				    + imag[i][j]* imag[k][j];
+				
+				adotbi+= real[i][j]*imag[k][j]
+				    -imag[i][j]*real[k][j];
+			    }
+
+			for (j=0;j<N;j++) 
+			    {
+				real[k][j]-= adotbr * real[i][j]
+			            -adotbi * imag[i][j];
+				imag[k][j]-= adotbr*imag[i][j]
+				    +adotbi* real[i][j];
+			    } 
+
+		    } /* end of k loop */
+	    } /* end of i loop */
+
+
+	/* remove determinant, treating group=2 or 3 as special cases */
+
+	switch (N) 
+	    {
+	    case 3:
+		thirdrow();
+		break; 
+	    case 2: /* for su(2) */
+		real[1][0]= -real[0][1];
+		real[1][1]=  real[0][0];
+		imag[1][0]=  imag[0][1];
+		imag[1][1]= -imag[0][0];
+		break;  
+	    default: /* remove the determinant from the first row */
+		double x=0.0 , y=0.0 ,w;
+		this.determinant(x,y);
+		for (i=0;i<N;i++) {
+		    w=real[0][i]*x
+			+ imag[0][i]*y;
+		    imag[0][i]= imag[0][i]*x
+			- real[0][i]*y;
+		    real[0][i]=w;
+		}
+	    } /* end switch */
+
+
     }
-  } /* end switch */
-
-    }
-
+    
 
 
     public gaugefield  conjugate() 
@@ -224,12 +243,64 @@ public class gaugefield
 				Tre += real[i][k] * real[j][k] ;
 				Tre += imag[i][k] * imag[j][k] ;
 
-				Tim -= real[i][k] * imag[k][j]  ;
-				Tim += imag[i][k] * real[k][j]  ;
+				Tim -= real[i][k] * imag[j][k]  ;
+				Tim += imag[i][k] * real[j][k]  ;
 			    }
 			System.out.printf("UU^dagger[%d,%d] = (%g, %g) \n",i,j, Tre, Tim);
 	    }
 	}
+    }
+
+
+
+
+
+/**
+ * Check the Unitarity of the gauge matrix
+ *
+ * Check that || U^dagger U - 1 ||
+ *
+ *
+ * @return 
+ */
+    public double check_unitarity_norm () 
+    {
+	double ans = 0.0 ;
+
+	for (int i = 0; i < N ; i++) 
+	    {
+		for (int j = 0; j < N  ; j++) 
+		    {
+			double Tre = 0.0 ;
+			double Tim = 0.0 ;
+			for (int k = 0; k < N  ; k++) 
+			    {
+				Tre += real[i][k] * real[j][k] ;
+				Tre += imag[i][k] * imag[j][k] ;
+
+				Tim -= real[i][k] * imag[j][k]  ;
+				Tim += imag[i][k] * real[j][k]  ;
+			    }
+			double tmp_re ;
+			double tmp_im ;
+
+			if( i == j )
+			    {
+				tmp_re = 1.0 - Tre ;
+				tmp_im = Tim ;
+			    }
+			else
+			    {
+				tmp_re = Tre ;
+				tmp_im = Tim ;
+			    }
+
+			ans += tmp_re*tmp_re + tmp_im*tmp_im ; 
+
+	    }
+	}
+
+	return Math.sqrt(ans) ;
     }
 
 
@@ -312,13 +383,6 @@ public class gaugefield
 	}
 
 }
-
-
-    //    gaugefield& project(); /* projects onto the gauge group */
-    // void determinant(double& rez, double& imz);
-    // void printgaugefield();
-    // gaugefield& operator= (double x);
-    // gaugefield& operator*= (double x);
 
 
 /**

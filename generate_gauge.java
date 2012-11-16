@@ -49,8 +49,6 @@ public class generate_gauge {
 	loop(ulinks,1,1);
 	
 
-	check_unitarity(ulinks) ;
-	System.exit(0) ;
     
 
 	/* Standard Monte Carlo updating */
@@ -61,10 +59,17 @@ public class generate_gauge {
 		for (int i=0 ; i < sweeps_between_meas ; i++) 
 		    {
 			monte(ulinks);
+
+			//			check_unitarity(ulinks) ;
+			// System.exit(0) ;
+
 			count++; 
 		    }
+		check_unitarity_norm(ulinks) ; // System.exit(0) ; 
 		renorm(ulinks);
-		loop(ulinks,2,2);
+		loop(ulinks,1,1);
+		check_unitarity_norm(ulinks) ; // System.exit(0) ; 
+
 	    } 
 	
 
@@ -532,7 +537,7 @@ public class generate_gauge {
 
 
     /**
-     * Check that the gauge configuration is uniarity
+     * Check that the gauge configuration is unitarity
      *
      *
      *
@@ -558,6 +563,49 @@ public class generate_gauge {
 	    }
 	return;
     }
+
+
+
+
+
+    /**
+     * Check that the gauge configuration is unitarity
+     *
+     *
+     *
+     * @param  gaugefield[nlinks] -- gauge configuration
+     *
+     */
+    
+
+    public static void check_unitarity_norm(gaugefield[]  l) 
+    { 
+	double norm_max = 0.0 ; 
+
+	/* loop over lattice octants. The 2 is for 
+	   two parities.
+	 */
+	for (int octant=0;octant<2*Global.DIM;octant++) 
+	    {
+		int link=octant*vectorlength;
+		for(int iv=0;iv<vectorlength;iv++)
+		    {
+			double norm = l[link+iv].check_unitarity_norm();
+			//			System.out.printf("Position[%d,%d]  norm = %g\n" ,
+			//		  link,iv, norm  );
+			if( norm > norm_max ) norm_max = norm ; 
+
+		    }
+
+	    }
+
+	System.out.printf("Maximum  norm = %g\n" , norm_max); 
+
+
+	return;
+    }
+
+
 
 
 
