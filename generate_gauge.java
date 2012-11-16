@@ -113,17 +113,31 @@ public class generate_gauge {
 	//  reserve memory
 	//  
 
+
+	//
+	// arrays with nlinks members
+	//
+
 	 ulinks=new gaugefield[nlinks];
 	 for(i=0 ; i < nlinks ; ++i)
 	    {
 		ulinks[i] = new gaugefield(N) ;
 	    }
 
+	 //
+	 // arrays with nsites members
+	 //
+
 	/* set starting links to identity matrix */
 	for (iv=0;iv<nlinks;iv++)
 	    ulinks[iv].set_unit() ;
 
 	parity=new int[nsites];
+
+	//
+	//  arrays with vectorlength meebers
+	//
+
 	table1=new gaugefield[vectorlength];
 	table2=new gaugefield[vectorlength];
 
@@ -156,7 +170,6 @@ public class generate_gauge {
 	accepted=new int[vectorlength];
 
 	myindex=new int[vectorlength];
-	myindex2=new int[vectorlength];
 
 	/* initialize shift array for locating links */
 	shift =new int[DIM];
@@ -176,6 +189,8 @@ public class generate_gauge {
 
 		parity[iv] &= 1;
 	    }
+
+	// debug_init(shift) ; System.exit(0) ;
 
 	maketable();
 	System.out.println("Initialisation done\n");
@@ -219,6 +234,8 @@ public class generate_gauge {
 	/* make into group elements */
 	vgroup(table1);
 	vgroup(table2);
+
+	check_unitarity_norm(table2) ; System.exit(0) ;
 	
 	/* update table a few times */
 	for (int i=0;i<50;i++)
@@ -571,9 +588,9 @@ public class generate_gauge {
     /**
      * Check that the gauge configuration is unitarity
      *
+     * This works for a vector of any length.
      *
-     *
-     * @param  gaugefield[nlinks] -- gauge configuration
+     * @param  gaugefield[] -- gauge configuration
      *
      */
     
@@ -581,26 +598,15 @@ public class generate_gauge {
     public static void check_unitarity_norm(gaugefield[]  l) 
     { 
 	double norm_max = 0.0 ; 
+	double dim = l.length ;
 
-	/* loop over lattice octants. The 2 is for 
-	   two parities.
-	 */
-	for (int octant=0;octant<2*Global.DIM;octant++) 
+	
+	for(int iv=0;iv < dim ; iv++)
 	    {
-		int link=octant*vectorlength;
-		for(int iv=0;iv<vectorlength;iv++)
-		    {
-			double norm = l[link+iv].check_unitarity_norm();
-			//			System.out.printf("Position[%d,%d]  norm = %g\n" ,
-			//		  link,iv, norm  );
-			if( norm > norm_max ) norm_max = norm ; 
-
-		    }
-
+		double norm = l[iv].check_unitarity_norm();
+		if( norm > norm_max ) norm_max = norm ; 
 	    }
-
 	System.out.printf("Maximum  norm = %g\n" , norm_max); 
-
 
 	return;
     }
@@ -761,14 +767,12 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
  */
     public static void makeindex(int n,int[] ind)
     {
-
-	int iv,site;
 	int[] x = new int[Global.DIM] ;
 
 	split(x,n);
-	site=0;
 
-	for(iv=0;iv<vectorlength;iv++)
+	int site=0;
+	for(int iv=0;iv<vectorlength;iv++)
 	    {
 		while (parity[site] != 0 ) site++;
 		ind[iv]=vshift(site,x);
@@ -1067,6 +1071,21 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
     }
 
 
+    public static void debug_init(int [] shift)
+    {
+
+	System.out.println("Dump out some tables\n");
+	for (int i=0;i<shift.length;i++)
+	    System.out.printf("Shift[%d] = %d\n" ,i, shift[i]   );
+
+	for (int iv=0;iv<nsites;iv++)
+	    {
+		System.out.printf("Parity[%d] = %d\n" ,iv, parity[iv]   );
+	    }
+
+    }
+
+
     //
     // variables in the class
     //
@@ -1081,7 +1100,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 
     public static int[] accepted ;
     public static int[] myindex ;
-    public static int[] myindex2 ;
     public static int[] parity ;
 
     public static double[] sold ;
