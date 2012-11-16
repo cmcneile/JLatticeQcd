@@ -13,7 +13,7 @@ public class Global {
 /**
  * Description of the variable here.
  */
-    public static int SIZE = 8 ;
+//    public static int SIZE = 8 ;
 
 /**
  * Beta value -- a parameter in the Wilson action
@@ -25,7 +25,7 @@ public class Global {
        Each dimension should be even
 
      */
-    public static int[] shape = {2 ,2 ,2 ,2 } ;
+    public static int[] shape = {4 ,4 ,4 ,4 } ;
 
 
     public static int HITS = 10 ;

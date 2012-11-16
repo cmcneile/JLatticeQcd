@@ -227,15 +227,15 @@ public class generate_gauge {
 			    temporary2.imag[i][j] += 
 				generator.nextDouble() -0.5;
 			} 
-		table1[iv]=temporary1;
-		table2[iv]=temporary2;
+		table1[iv]=temporary1.copy() ;
+		table2[iv]=temporary2.copy() ;
 	    }
 
 	/* make into group elements */
 	vgroup(table1);
 	vgroup(table2);
 
-	check_unitarity_norm(table2) ; System.exit(0) ;
+	check_unitarity_norm(table2) ; // System.exit(0) ;
 	
 	/* update table a few times */
 	for (int i=0;i<50;i++)
@@ -243,19 +243,6 @@ public class generate_gauge {
 
 	return;
     }
-
-    /* 
-       subroutine to make group elements out of 
-       vectorlength matrices g 
-    */
-    public static void vgroup(gaugefield[] g)
-    {
-	int iv;
-	for(iv=0;iv<vectorlength;iv++)
-	    g[iv].project();
-	return;
-    }
-
 
 
 
@@ -281,15 +268,17 @@ public class generate_gauge {
     {
 	int DIM = Global.DIM ; 
 
-	int i;
 	if (s<0 || s>=nsites) cleanup("bad split");
-	for(i=DIM-1;i>0;i--){
-	    x[i]=0;
-	    while (s>=shift[i]){
-		s-=shift[i];
-		x[i]++;
+
+	for(int i=DIM-1 ; i>0 ;i--)
+	    {
+		x[i]=0;
+		while (s>=shift[i])
+		    {
+			s-=shift[i];
+			x[i]++;
+		    }
 	    }
-	}
 	x[0]=s;
 	return;
     }
@@ -318,51 +307,6 @@ public class generate_gauge {
 	return;
     }
 
-
-  /* 
-     set g3 to the matrix product of g1 and g2, vectorlength times 
-  */    
-
-    public static gaugefield[] vcopy(gaugefield[] g1) 
-    {
-	gaugefield[] g3 ; 
-	g3 = new gaugefield[vectorlength] ;
-	for(int i=0 ; i < vectorlength ; ++i)
-	    {
-		g3[i] = new gaugefield(N);
-	    }	
-	
-
-	for(int iv=0;iv<vectorlength;iv++)
-	    g3[iv]=g1[iv].copy() ;
-	
-	return g3 ;
-    }
-
-  /* matrix sum of g1 and g2 to g3, vectorlength times */
-    public static gaugefield[] vsum(gaugefield[] g1,gaugefield[] g2) 
-    {
-	gaugefield[] g3 ;
-	g3 = new gaugefield[vectorlength] ;
-	for(int i=0 ; i < vectorlength ; ++i)
-	    {
-		g3[i] = new gaugefield(N);
-	    }	
-
-	/*   slightly faster writing this out over:
-	     forvector
-	     g3[iv]=g1[iv]+g2[iv];
-	*/  
-	for(int i=0;i< N;i++)
-	    for(int j=0;j< N;j++)
-		for(int iv=0;iv<vectorlength;iv++) 
-		    {
-			g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
-			g3[iv].imag[i][j]=g1[iv].imag[i][j]+g2[iv].imag[i][j];
-		    }
-
-	return g3 ; 
-    }
 
 
   /* 
@@ -409,6 +353,23 @@ public class generate_gauge {
      *****************************************/
 
 
+/**
+ * Project an array of matrics to the SU(3) group.
+ *
+ *
+ *
+ * @param  gaugefield[vectorlength] g -- vector of gaugefields
+ */
+
+
+    public static void vgroup(gaugefield[] g)
+    {
+	int iv;
+	for(iv=0;iv<vectorlength;iv++)
+	    g[iv].project();
+	return;
+    }
+
 
 /**
  * At each vector position compute the trace of gaugefield
@@ -433,6 +394,63 @@ public class generate_gauge {
 	return g3 ;
     }
 
+
+/**
+ * Vector copy of gauge matrices
+ *
+ *
+ * @param  gaugefield[vectorlength] ginput
+ * @return gaugefield[vectorlength] gcopy  -- copy of ginput 
+ */
+    public static gaugefield[] vcopy(gaugefield[] ginput) 
+    {
+	gaugefield[] gcopy ; 
+	gcopy = new gaugefield[vectorlength] ;
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		gcopy[i] = new gaugefield(N);
+	    }	
+
+	for(int iv=0;iv<vectorlength;iv++)
+	    gcopy[iv]=ginput[iv].copy() ;
+	
+	return gcopy ;
+    }
+
+
+
+
+
+/**
+ * Matrix product for a vector of matrices.
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+ *
+ * @param  gaugefield[vectorlength] g1
+ * @param  gaugefield[vectorlength] g2
+ * @return double[vectorlength]          -- matrix product g1 * g2 
+ */
+    public static gaugefield[] vsum(gaugefield[] g1,gaugefield[] g2) 
+    {
+	gaugefield[] g3 ;
+	g3 = new gaugefield[vectorlength] ;
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g3[i] = new gaugefield(N);
+	    }	
+
+	for(int i=0;i< N;i++)
+	    for(int j=0;j< N;j++)
+		for(int iv=0;iv<vectorlength;iv++) 
+		    {
+			g3[iv].real[i][j]=g1[iv].real[i][j]+g2[iv].real[i][j];
+			g3[iv].imag[i][j]=g1[iv].imag[i][j]+g2[iv].imag[i][j];
+		    }
+
+	return g3 ; 
+    }
 
 
 
@@ -459,9 +477,6 @@ public class generate_gauge {
 
 
 
-  /* 
-
-  */    
 
 /**
  *    set g3 to the matrix product of g1 and g2, vectorlength times 
@@ -471,10 +486,8 @@ public class generate_gauge {
  *
  * @param  gaugefield[vectorlength] g2
  * @param  gaugefield[vectorlength] g1
- * @return double[vectorlength]          -- g3 = g1 + g2
+ * @return double[vectorlength]          -- g3 = g1 * g2
  */
-
-
     public static  gaugefield[] vprod(gaugefield[] g1 , gaugefield[] g2) 
     {
 	gaugefield[] g3 ; 
@@ -521,6 +534,39 @@ public class generate_gauge {
 
 	return g ;
     }
+
+
+
+/**
+ * real trace of product g1 and g2 to s, vectorlength times 
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+ * @param  gaugefield[] g2 --
+ * @param  gaugefield[] g1 -- 
+ * @return double []       --
+ */
+
+    public static double[] vtprod(gaugefield[] g1, gaugefield[] g2)
+    {
+	double[] s = new double[vectorlength] ;
+	
+	for(int iv=0;iv<vectorlength;iv++)
+	    s[iv]=0.0;
+
+
+	for(int iv=0;iv<vectorlength;iv++)
+	    for(int i=0;i<N;i++)
+		for(int j=0;j<N;j++)
+		    s[iv]+=g1[iv].real[i][j]*g2[iv].real[j][i]
+			-g1[iv].imag[i][j]*g2[iv].imag[j][i];   
+	
+	return s ;
+    }
+    
+
+
 
 
     /**
@@ -638,20 +684,19 @@ public class generate_gauge {
 	int HITS = Global.HITS ;
 	
 	double stot,acc,eds;
-	int iv,iacc,color,link,hit;
 
 	/* update table */
 	vtable(); 
 
 	stot=eds=0.0;
-	iacc=0;
+	int iacc = 0;
 
 	/* loop over checkerboard colors */
 
-	for (color=0;color<2;color++) 
+	for (int color=0;color<2;color++) 
 	    {
 		/* loop over link dirs */
-		for (link=0;link<DIM;link++) 
+		for (int link=0;link<DIM;link++) 
 		    {
 			/* get neighborhood */
 			mtemp4 = staple(lattice,color,link); 
@@ -661,7 +706,7 @@ public class generate_gauge {
 			sold = vtprod(mtemp0,mtemp4);
 
 			/* loop over hits */
-			for (hit=0;hit<HITS;hit++) 
+			for (int hit=0;hit<HITS;hit++) 
 			    {
 				/* get random matrices */
 				mtemp1 = ranmat() ;
@@ -673,7 +718,7 @@ public class generate_gauge {
 					     Global.beta/(1.*N)); 
 
 				/* metropolis step */
-				for(iv=0;iv<vectorlength;iv++) 
+				for(int iv=0;iv<vectorlength;iv++) 
 				    {
 					iacc=iacc+accepted[iv];
 					stot=stot+sold[iv];
@@ -713,8 +758,8 @@ public class generate_gauge {
 
 public static gaugefield[] staple(gaugefield[] lat,int site,int link) 
 {
-  int iv,link1,site1,site2,site4,site5;
-  gaugefield[] st ; // MoreWork need to reserve memory
+  int site1,site2,site4,site5;
+  gaugefield[] st ; 
 
   st = new gaugefield[vectorlength] ; 
   for(int i=0 ; i < vectorlength ; ++i)
@@ -722,14 +767,10 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	  st[i] = new gaugefield(N);
       }	
 
-
-  for(iv=0;iv<vectorlength;iv++)
-      st[iv] = new gaugefield(N)  ;
-
   site1=ishift(site,link,1);
 
   /* loop over planes */
-  for (link1=0;link1<Global.DIM;link1++)
+  for (int link1=0;link1<Global.DIM;link1++)
     if (link1!=link) 
 	{
 	    site2=ishift(site ,link1, 1);
@@ -775,7 +816,8 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	for(int iv=0;iv<vectorlength;iv++)
 	    {
 		while (parity[site] != 0 ) site++;
-		ind[iv]=vshift(site,x);
+
+		ind[iv] = vshift(site,x);
 		site++;
 	    }
 	return;
@@ -784,28 +826,32 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 
 
     /**
-     * Shift a site n by vector x
+     * Shift a site site_start by vector x[]
      *
      *
-     * @param  n  starting site
+     * @param  site_start --  starting site
      * @param  x[] shift direction
      * @return site (integer)
      */
-    public static int vshift(int n, int[] x)
+    public static int vshift(int site_start, int[] x)
     {
-	int i ;
 	int[] y = new int[Global.DIM];
 	
-	split(y,n);
-	for(i=0;i<Global.DIM;i++){
-	    if (x[i] != 0){
-		y[i]+=x[i];
-		while (y[i]>=Global.shape[i])
-		    y[i]-=Global.shape[i];
-		while (y[i]<0)
-		    y[i]+= Global.shape[i];
+	split(y,site_start);
+
+	for(int i=0 ; i<Global.DIM ; i++)
+	    {
+		if (x[i] != 0)
+		    {
+			y[i] += x[i];
+
+			while (y[i]>=Global.shape[i])
+			    y[i]-=Global.shape[i];
+			while (y[i]<0)
+			    y[i]+= Global.shape[i];
+		    }
 	    }
-	}
+
 	return siteindex(y);
 
 }
@@ -814,7 +860,7 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
    
 
     /**
-     * Gives a unique index to site located at x[DIM] *
+     * Gives a unique index to site located at x[DIM] 
      *
      *
      * @param  x[] -- lattice coordinates
@@ -839,13 +885,13 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
      * Longer description. If there were any, it would be    [2]
      * here.
      *
-     * @param  n
+     * @param  site_start
      * @param  direction   -- direction that the sift is in
      * @param  dist
      * @return site (integer)
      */
 
-    public static int ishift( int n, int dir, int dist)
+    public static int ishift(int site_start, int dir, int dist)
     {
 	
 	int i ;
@@ -854,7 +900,7 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	    x[i]=0;
 
 	x[dir]=dist;
-	return vshift(n,x);
+	return vshift(site_start,x);
 }
 
 
@@ -871,7 +917,7 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
  * @param  int link -- direction of gauge configuration
  * @return gaugefield[vectorlength]
  */
-    public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int link)
+    public static gaugefield[]  getlinks(gaugefield[] lattice,int site,int gdir)
     {
 	gaugefield[] g = new gaugefield[vectorlength] ;
 	for(int i=0 ; i < vectorlength ; ++i)
@@ -879,10 +925,10 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 		g[i] = new gaugefield(N);
 	    }
 
-
+	//	System.out.println("getlinks::site = " + site + " gdir = " + gdir);
 	makeindex(site,myindex);
 
-	int shift=nsites*link;
+	int shift=nsites*gdir;
 	for(int iv=0;iv<vectorlength;iv++)
 	    g[iv]=lattice[myindex[iv]+shift];
 	
@@ -891,35 +937,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
     }
 
 
-
-/**
- * real trace of product g1 and g2 to s, vectorlength times 
- *
- * Longer description. If there were any, it would be    [2]
- * here.
- *
- * @param  gaugefield[] g2 --
- * @param  gaugefield[] g1 -- 
- * @return double []       --
- */
-
-    public static double[] vtprod(gaugefield[] g1, gaugefield[] g2)
-    {
-	double[] s = new double[vectorlength] ;
-	
-	for(int iv=0;iv<vectorlength;iv++)
-	    s[iv]=0.0;
-
-
-	for(int iv=0;iv<vectorlength;iv++)
-	    for(int i=0;i<N;i++)
-		for(int j=0;j<N;j++)
-		    s[iv]+=g1[iv].real[i][j]*g2[iv].real[j][i]
-			-g1[iv].imag[i][j]*g2[iv].imag[j][i];   
-	
-	return s ;
-    }
-    
 
 
 
