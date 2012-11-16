@@ -43,7 +43,7 @@ public class generate_gauge {
 	//	ulinks[iv].printmatrix() ;
 	//    }
 
-	loop(ulinks,2,2);
+	loop(ulinks,1,1);
 	// System.exit(0) ;
     
 
@@ -374,6 +374,12 @@ public class generate_gauge {
 	return g;
     }
 
+    /*****************************************
+
+      Start of vector routines 
+
+     *****************************************/
+
 
 
     public static double[] vtrace(gaugefield[] g1) 
@@ -411,6 +417,75 @@ public class generate_gauge {
 
 	return g3 ;
     }
+
+
+
+/**
+ * gather conjugate links into vector g 
+ *
+ * Longer description. If there were any, it would be    [2]
+ * here.
+ *
+ * @param  int link -- direction
+ * @param  int site
+ * @param  gaugefield[] lat
+ * @return gaugefield[vectorlength]
+ */
+    public static gaugefield[] getconjugate(gaugefield[] lat,int site,int link)
+    {
+	gaugefield[] g = new gaugefield[vectorlength] ; 
+	for(int i=0 ; i < vectorlength ; ++i)
+	    {
+		g[i] = new gaugefield(N);
+	    }	
+
+
+	makeindex(site,myindex);
+	int shift=nsites*link;
+
+	for(int iv=0;iv<vectorlength;iv++)
+	    g[iv]=lat[myindex[iv]+shift].conjugate();
+
+
+	return g ;
+    }
+
+
+    /**
+     * Reunitarise gauge configuratiom.
+     *
+     * project whole lattice into group; call from time to time 
+     *    to keep down drift from floating point errors 
+     *
+     *
+     * @param  gaugefield -- gauge configuration
+     *
+     */
+    
+
+    public static void renorm(gaugefield[]  l) 
+    { 
+	/* loop over lattice octants. The 2 is for 
+	   two parities.
+	 */
+	for (int octant=0;octant<2*Global.DIM;octant++) 
+	    {
+		int link=octant*vectorlength;
+		for(int iv=0;iv<vectorlength;iv++)
+		    l[link+iv].project();
+	    }
+	return;
+    }
+
+
+
+
+
+    /******************************************
+
+       MonteCarlo routines.
+
+     ****************************************/
 
 
 /**
@@ -543,37 +618,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 
   return st ;
 }
-
-
-/**
- * gather conjugate links into vector g 
- *
- * Longer description. If there were any, it would be    [2]
- * here.
- *
- * @param  int link -- direction
- * @param  int site
- * @param  gaugefield[] lat
- * @return gaugefield[vectorlength]
- */
-    public static gaugefield[] getconjugate(gaugefield[] lat,int site,int link)
-    {
-	gaugefield[] g = new gaugefield[vectorlength] ; 
-	for(int i=0 ; i < vectorlength ; ++i)
-	    {
-		g[i] = new gaugefield(N);
-	    }	
-
-
-	makeindex(site,myindex);
-	int shift=nsites*link;
-
-	for(int iv=0;iv<vectorlength;iv++)
-	    g[iv]=lat[myindex[iv]+shift].conjugate();
-
-
-	return g ;
-    }
 
 
 /**
@@ -891,31 +935,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	System.out.printf("W[%d,%d] = %g\n",x,y,result);
 	return result;
     }
-
-/**
- * Reunitarise gauge configuratiom.
- *
- * project whole lattice into group; call from time to time 
- *    to keep down drift from floating point errors 
- *
- *
- * @param  gaugefield -- gauge configuration
- *
- */
-
-
-public static void renorm(gaugefield[]  l) 
-{ 
-  int iv,octant,link;
-  /* loop over lattice octants */
-  for (octant=0;octant<2*Global.DIM;octant++) 
-      {
-	  link=octant*vectorlength;
-	  for(iv=0;iv<vectorlength;iv++)
-	      l[link+iv].project();
-      }
-  return;
-}
 
 
     //

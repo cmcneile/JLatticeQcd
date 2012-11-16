@@ -1,21 +1,25 @@
+/**
+ * @author      Craig McNeile
+ * @version     0.5      
+ * @since       2012-11-16  
+ */
 
-public class gaugefield {
-
+public class gaugefield 
+{
 
     public gaugefield (int d)
     {
-	this.GROUP = d ;
+	this.N = d ;
 	real = new double[d][d] ;
 	imag = new double[d][d] ;
     }
 
-
-
-    public void printmatrix(){
+    public void printmatrix()
+    {
 	int i,j;
-	for (i=0;i<GROUP;i++){
+	for (i=0;i<N;i++){
 	    System.out.printf("\n");
-	    for (j=0;j<GROUP;j++){
+	    for (j=0;j<N;j++){
 		System.out.printf(" (%g, %g)   ",real[i][j],imag[i][j]);
 	    }
 	}
@@ -23,27 +27,27 @@ public class gaugefield {
     }
 
 
-    /* projects a matrix onto the group SU(GROUP) */
+    /* projects a matrix onto the group SU(N) */
     public void project()
     {
 	int i,j,k,nmax;
-	//	nmax=GROUP-(GROUP<4); /* 2 and 3 are treated specially */
+	//	nmax=N-(N<4); /* 2 and 3 are treated specially */
 
-	if( GROUP<4 )
-	    nmax = GROUP - 1  ;
+	if( N<4 )
+	    nmax = N - 1  ;
 	else
-	    nmax = GROUP ;
+	    nmax = N ;
 
 	/* loop over rows */
 	for (i=0;i<nmax;i++) {
 	    /* normalize i'th row */
 	    double temp=real[i][0] * real[i][0]
 		+ imag[i][0]*imag[i][0];
-	    for (j=1;j<GROUP;j++)
+	    for (j=1;j<N;j++)
 		temp+= real[i][j]*real[i][j]
 		    +imag[i][j]*imag[i][j];
 	    temp=1/Math.sqrt(temp);   
-	    for (j=0;j<GROUP;j++) {
+	    for (j=0;j<N;j++) {
 		real[i][j]*=temp;
 		imag[i][j]*=temp;
 	    }
@@ -54,13 +58,13 @@ public class gaugefield {
 	+imag[i][0]*imag[k][0];
       adotbi= real[i][0]*imag[k][0]
 	-imag[i][0]*real[k][0];
-      for (j=1;j<GROUP;j++) {
+      for (j=1;j<N;j++) {
 	adotbr+=real[i][j]*real[k][j]
 	  + imag[i][j]* imag[k][j];
 	adotbi+= real[i][j]*imag[k][j]
 	  -imag[i][j]*real[k][j];
       }
-      for (j=0;j<GROUP;j++) {
+      for (j=0;j<N;j++) {
 	real[k][j]-=adotbr* real[i][j]
 	  -adotbi*imag[i][j];
 	imag[k][j]-= adotbr*imag[i][j]
@@ -70,7 +74,7 @@ public class gaugefield {
   } /* end of i loop */
     /* remove determinant, treating group=2 or 3 as special cases */
 
-  switch (GROUP) {
+  switch (N) {
   case 3:
     thirdrow();
     break; 
@@ -83,7 +87,7 @@ public class gaugefield {
   default: /* remove the determinant from the first row */
     double x=0.0 , y=0.0 ,w;
     this.determinant(x,y);
-    for (i=0;i<GROUP;i++) {
+    for (i=0;i<N;i++) {
       w=real[0][i]*x
 	+ imag[0][i]*y;
       imag[0][i]= imag[0][i]*x
@@ -98,10 +102,10 @@ public class gaugefield {
 
     public gaugefield  conjugate() 
     {
-	gaugefield result = new gaugefield(GROUP) ;
+	gaugefield result = new gaugefield(N) ;
 
-	for(int i=0;i<GROUP;i++)
-	    for(int j=0;j<GROUP;j++) 
+	for(int i=0;i<N;i++)
+	    for(int j=0;j<N;j++) 
 		{
 		    result.real[i][j]= real[j][i];
 		    result.imag[i][j]= -imag[j][i];
@@ -115,13 +119,14 @@ public class gaugefield {
     public void set_constant(double re, double im)
     {
 	int i,j;
-	for (i=0;i<GROUP;i++){
-	    for (j=0;j<GROUP;j++){
-		real[i][j] = re ; 
-		imag[i][j] = im ;
-
+	for (i=0;i<N;i++)
+	    {
+		for (j=0;j<N;j++)
+		    {
+			real[i][j] = re ; 
+			imag[i][j] = im ;
+		    }
 	    }
-	}
 
 
     }
@@ -131,15 +136,15 @@ public class gaugefield {
     public void set_unit()
     {
 	int i,j;
-	for (i=0;i<GROUP;i++){
-	    for (j=0;j<GROUP;j++){
+	for (i=0;i<N;i++){
+	    for (j=0;j<N;j++){
 		real[i][j] = 0.0 ; 
 		imag[i][j] = 0.0 ;
 
 	    }
 	}
 
-	for (i=0;i<GROUP;i++)
+	for (i=0;i<N;i++)
 	    real[i][i] = 1.0 ; 
 
     }
@@ -151,7 +156,7 @@ public class gaugefield {
 	double ans = 0.0  ;
 
 	int i ;
-	for (i=0;i<GROUP;i++)
+	for (i=0;i<N;i++)
 	    ans += imag[i][i]  ;
 
 	return ans ;
@@ -160,10 +165,10 @@ public class gaugefield {
 
 
     public gaugefield copy () {
-	gaugefield X = new gaugefield(GROUP);
+	gaugefield X = new gaugefield(N);
 
-	for (int i = 0; i < GROUP ; i++) {
-	    for (int j = 0; j < GROUP  ; j++) {
+	for (int i = 0; i < N ; i++) {
+	    for (int j = 0; j < N  ; j++) {
 		X.real[i][j] = real[i][j] ;
 		X.imag[i][j] = imag[i][j] ;
 	    }
@@ -176,14 +181,14 @@ public class gaugefield {
 
     public gaugefield prod (gaugefield Y) 
     {
-	gaugefield X = new gaugefield(GROUP);
+	gaugefield X = new gaugefield(N);
 
-	for (int i = 0; i < GROUP ; i++) {
-	    for (int j = 0; j < GROUP  ; j++) {
+	for (int i = 0; i < N ; i++) {
+	    for (int j = 0; j < N  ; j++) {
 		X.real[i][j] = 0.0 ;
 		X.imag[i][j] = 0.0 ;
 
-	    for (int k = 0; k < GROUP  ; k++) {
+	    for (int k = 0; k < N  ; k++) {
 		X.real[i][j] += real[i][k] * Y.real[k][j] ;
 		X.real[i][j] -= imag[i][k] * Y.imag[k][j] ;
 
@@ -199,14 +204,44 @@ public class gaugefield {
 
 
 
+/**
+ * Check the Unitarity of the gauge matrix
+ *
+ * Check that U^dagger U = 1 
+ *
+ *
+ */
+    public void check_unitarity () 
+    {
+	for (int i = 0; i < N ; i++) 
+	    {
+		for (int j = 0; j < N  ; j++) 
+		    {
+			double Tre = 0.0 ;
+			double Tim = 0.0 ;
+			for (int k = 0; k < N  ; k++) 
+			    {
+				Tre += real[i][k] * real[j][k] ;
+				Tre += imag[i][k] * imag[j][k] ;
+
+				Tim -= real[i][k] * imag[k][j]  ;
+				Tim += imag[i][k] * real[k][j]  ;
+			    }
+			System.out.printf("UU^dagger[%d,%d] = (%g, %g)   ",i,j, Tim, Tim);
+	    }
+	}
+    }
+
+
+
 
 
     public gaugefield sub (gaugefield Y) 
     {
-	gaugefield X = new gaugefield(GROUP);
+	gaugefield X = new gaugefield(N);
 
-	for (int i = 0; i < GROUP ; i++) {
-	    for (int j = 0; j < GROUP  ; j++) {
+	for (int i = 0; i < N ; i++) {
+	    for (int j = 0; j < N  ; j++) {
 		X.real[i][j] = real[i][j] - Y.real[i][j] ;
 		X.imag[i][j] = imag[i][j] - Y.imag[i][j]  ;
 	    }
@@ -227,20 +262,20 @@ public class gaugefield {
 	int i,j,k,im,km;
 	double temp;
 	
-	im=GROUP-1;
+	im=N-1;
 	for (i=0;i<im;i++) {
 	    km=i+1;
 	    /* find magnitude of i'th diagonal element */
 	    temp=1./(this.real[i][i]*this.real[i][i]
 	     +this.imag[i][i]*this.imag[i][i]);
-	    for (k=km;k<GROUP;k++) {
+	    for (k=km;k<N;k++) {
 		/* subtract part of row i from row k to make [k][i] element vanish */
 		/* inner product of the rows */
 		detr=(this.real[k][i]*this.real[i][i]
 		      +this.imag[k][i]*this.imag[i][i])*temp;
 		deti=(this.imag[k][i]*this.real[i][i]
 		      -this.real[k][i]*this.imag[i][i])*temp;
-		for (j=km;j<GROUP;j++) {
+		for (j=km;j<N;j++) {
 		    this.real[k][j]+= -detr*this.real[i][j]
 			+deti*this.imag[i][j];
 		    this.imag[k][j]+=  -detr*this.imag[i][j]
@@ -251,7 +286,7 @@ public class gaugefield {
 	/* multiply diagonal elements */
 	detr=this.real[0][0];
 	deti=this.imag[0][0];
-	for (i=1;i<GROUP;i++) {
+	for (i=1;i<N;i++) {
 	    temp=detr*this.real[i][i]-deti*this.imag[i][i];
 	    deti=deti*this.real[i][i]+detr*this.imag[i][i];
 	    detr=temp;
@@ -286,11 +321,20 @@ public class gaugefield {
     // gaugefield& operator*= (double x);
 
 
-
+/**
+ * Real part of SU(N) matrix
+ */
     public double[][] real ;
+
+/**
+ * Imaginary part of SU(N) matrix
+ */
     public double[][] imag ;
 
-    private int GROUP ;
+/**
+ * Group SU(N)
+ */
+    private int N ;
 
 };
 
