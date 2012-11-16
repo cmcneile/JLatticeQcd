@@ -1,3 +1,4 @@
+
 public class gaugefield {
 
 
@@ -68,6 +69,7 @@ public class gaugefield {
     } /* end of k loop */
   } /* end of i loop */
     /* remove determinant, treating group=2 or 3 as special cases */
+
   switch (GROUP) {
   case 3:
     thirdrow();
@@ -172,7 +174,8 @@ public class gaugefield {
 
 
 
-    public gaugefield prod (gaugefield Y) {
+    public gaugefield prod (gaugefield Y) 
+    {
 	gaugefield X = new gaugefield(GROUP);
 
 	for (int i = 0; i < GROUP ; i++) {
@@ -198,7 +201,8 @@ public class gaugefield {
 
 
 
-    public gaugefield sub (gaugefield Y) {
+    public gaugefield sub (gaugefield Y) 
+    {
 	gaugefield X = new gaugefield(GROUP);
 
 	for (int i = 0; i < GROUP ; i++) {
