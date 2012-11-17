@@ -39,6 +39,12 @@ public class generate_gauge {
 	N = Global.GROUP ; 
 
 	System.out.println("Pure gauge simulation of SU(" + N + ") theory");
+	if( N > 3 )
+	    {
+		System.out.println("The code has not been checked for N > 3 ");
+		System.exit(0) ;
+	    }
+
 	init() ;
 
 	System.out.printf("Lattice size %d" ,  Global.shape[0] );

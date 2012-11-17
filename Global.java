@@ -16,6 +16,7 @@ public class Global {
  * Beta value -- a parameter in the Wilson action
  */
     public static double beta = 2.3 ;
+//    public static double beta = 5.7 ;
 
     /**
      * Dimension of the lattice
