@@ -9,12 +9,6 @@
 
 
 
-// http://www.cs.geneseo.edu/~baldwin/reference/random.html
-
-
-//
-//
-
 
 import java.util.Random;
 
@@ -24,7 +18,7 @@ public class generate_gauge {
     public static void main(String[] argv)
     {
 
-	int a , b , c ; 
+	//	int a , b , c ; 
 	int sweeps_between_meas = 5 ;
 	int max_sweeps = 50 ; 
 
@@ -43,7 +37,7 @@ public class generate_gauge {
 			   Global.beta);
 	System.out.println("-----------------");
 
-	//	dump_matrix(ulinks, nlinks); 
+	//	dump_matrix(ulinks); 
 	// System.exit(0) ;
 
 	loop(ulinks,1,1);
@@ -58,6 +52,7 @@ public class generate_gauge {
 		int count=0;
 		for (int i=0 ; i < sweeps_between_meas ; i++) 
 		    {
+			//			System.out.println("DEBUG Sweep number " + i);
 			monte(ulinks);
 
 			//			check_unitarity(ulinks) ;
@@ -124,13 +119,13 @@ public class generate_gauge {
 		ulinks[i] = new gaugefield(N) ;
 	    }
 
+	 /* set starting links to identity matrix */
+	 for (iv=0;iv<nlinks;iv++)
+	     ulinks[iv].set_unit() ;
+
 	 //
 	 // arrays with nsites members
 	 //
-
-	/* set starting links to identity matrix */
-	for (iv=0;iv<nlinks;iv++)
-	    ulinks[iv].set_unit() ;
 
 	parity=new int[nsites];
 
@@ -202,6 +197,7 @@ public class generate_gauge {
 /**
  * Generate tables of vectorlength random matrices 
  *
+ * The table1 and table2 are created.
  *
  */
     public static void maketable()
@@ -212,8 +208,8 @@ public class generate_gauge {
 	for(int iv=0;iv<vectorlength;iv++)
 	    {
 		/* bias towards the identity */
-		temporary1.set_constant(Global.beta/N, 0.0);
-		temporary2.set_constant(Global.beta/N, 0.0) ;
+		temporary1.set_diag(Global.beta/N, 0.0);
+		temporary2.set_diag(Global.beta/N, 0.0) ;
 		for(int i=0; i < N ; i++)
 		    for(int j=0; j < N ; j++)
 			{
@@ -236,20 +232,33 @@ public class generate_gauge {
 	vgroup(table2);
 
 	check_unitarity_norm(table2) ; // System.exit(0) ;
+
+	//System.out.println("DEBUG Table 1");
+	//dump_matrix(table1) ;
+
+	//System.out.println("DEBUG Table 2");
+	//dump_matrix(table2) ;
+
+	//	System.exit(0) ;
 	
 	/* update table a few times */
 	for (int i=0;i<50;i++)
-	    vtable();
-
+	    {
+		//		System.out.println("Updating table " + i);
+		vtable();
+	    }
 	return;
     }
 
 
 
 
-    //
-    //  Basic end of program
-    //
+/**
+ * Basic end of program 
+ *
+ *
+ * @param  string msg 
+ */
     public static void cleanup(String msg )
     {
 	System.out.println("Error: " + msg);
@@ -257,13 +266,19 @@ public class generate_gauge {
     }
 
 
-    /* splits a site index into coordinates 
-       assume s in valid range 0<=s<nsites 
-       I (Creutz) think this is faster than using mods, 
-       but this should be tested 
-    */
- 
 
+
+/**
+ *
+ *    splits a site index into coordinates 
+ *      assume s in valid range 0<=s<nsites 
+ *      I (Creutz) think this is faster than using mods, 
+ *      but this should be tested 
+ *
+ *
+ * @param  int s
+ * @param  int[] 
+ */
     public static void split(int[] x, int s)
     {
 	int DIM = Global.DIM ; 
@@ -284,22 +299,44 @@ public class generate_gauge {
     }
 
 
-    /* update matrix table */
-    public static void vtable() 
-    {/* shuffle table 1  into a */
+   
 
+
+/**
+ * Randomly permutate the table1 and table2 tables
+ *
+ * The table1 and table2 are modified.
+ *  update matrix table
+ *
+ */
+    public static void vtable() 
+    {
 	mtemp0 = ranmat();
 
 	/* multiply table 2 by a into table 1 for trial change */
 	table1 =  vprod(table2 , mtemp0 );
 
+	//System.out.println("DEBUG Table 1"); 
+	//dump_matrix(table1) ; 
+
+	//System.out.println("DEBUG Table 2"); 
+	//dump_matrix(table2) ; 
+	//System.exit(0) ;  
+
 	/* metropolis select new table 2 */
-	sold = vtrace(table2 );
+	sold =  vtrace(table2);
 	snew =  vtrace(table1);
+
+	// for(int ii=0 ; ii < snew.length ; ++ii)
+	//    {
+	//	System.out.println("DEBUG old,new " + ii + " " + sold[ii] + " " + snew[ii] ); 
+	//    } 
+
+	//	System.exit(0) ;  
 	metro(table2,table1,6*Global.beta/N);  
 
 	/* switch table 1 and 2 */
-	table1 =  vcopy(table2);
+	table1 = vcopy(table2);
 	table2 = vcopy(mtemp0); 
 
 	vgroup(table1);
@@ -309,11 +346,13 @@ public class generate_gauge {
 
 
 
-  /* 
-     randomly shift table1, randomly invert, and put in g 
-     This is a vector operation so maybe better name.
-     
-  */
+/**
+ * Randomly shift table1, randomly invert, and put in g 
+ *
+ * @return gaugefield[vectorlength] g1 -- randomly permuted table1
+ */
+
+
   public static gaugefield[] ranmat() 
     {
 	gaugefield[] g ; 
@@ -324,8 +363,10 @@ public class generate_gauge {
 	    }	
 
 
-	// index=(int) (vectorlength*drand48());
-	int index = generator.nextInt(vectorlength) + 1 ;
+	//	int index = generator.nextInt(vectorlength) + 1 ;
+	int index = generator.nextInt(vectorlength)  ;
+
+	//		System.out.println("DEBUG random index = " + index);
 
 	/* the random inversion from ranmat is important! */
 
@@ -334,6 +375,7 @@ public class generate_gauge {
 		if (index>=vectorlength) index-=vectorlength;
 		
 		double rr = generator.nextDouble();
+		//		System.out.println("DEBUG random = " + rr);
 		
 		if( rr < 0.5 )
 		    g[iv]=table1[index].copy() ;
@@ -364,34 +406,31 @@ public class generate_gauge {
 
     public static void vgroup(gaugefield[] g)
     {
-	int iv;
-	for(iv=0;iv<vectorlength;iv++)
+	for(int iv=0;iv<vectorlength;iv++)
 	    g[iv].project();
+
 	return;
     }
 
 
 /**
- * At each vector position compute the trace of gaugefield
+ * At each vector position compute the real trace of gaugefield
  *
- * Longer description. If there were any, it would be    [2]
- * here.
  *
-
  * @param  gaugefield[vectorlength] g1
- * @return double[vectorlength]          -- trace of gaugefields
+ * @return double[vectorlength]          -- real trace of gaugefields
  */
 
     public static double[] vtrace(gaugefield[] g1) 
     {
-	double[] g3 ; 
-	g3 = new double[vectorlength] ;
+	double[] spur ; 
+	spur = new double[vectorlength] ;
 
 	for(int iv=0;iv<vectorlength;iv++)
-	    g3[iv]=g1[iv].trace_re() ;
+	    spur[iv]=g1[iv].trace_re() ;
     
 
-	return g3 ;
+	return spur ;
     }
 
 
@@ -422,7 +461,7 @@ public class generate_gauge {
 
 
 /**
- * Matrix product for a vector of matrices.
+ * Matrix sum for a vector of matrices.
  *
  * Longer description. If there were any, it would be    [2]
  * here.
@@ -430,7 +469,7 @@ public class generate_gauge {
  *
  * @param  gaugefield[vectorlength] g1
  * @param  gaugefield[vectorlength] g2
- * @return double[vectorlength]          -- matrix product g1 * g2 
+ * @return double[vectorlength]          -- matrix product g1 + g2 
  */
     public static gaugefield[] vsum(gaugefield[] g1,gaugefield[] g2) 
     {
@@ -466,9 +505,9 @@ public class generate_gauge {
  * @return double[vectorlength]          -- trace of gaugefields
  */
 
-    public static void dump_matrix(gaugefield[] g, int dim) 
+    public static void dump_matrix(gaugefield[] g) 
     {
-	for(int iv=0; iv < dim ;iv++)
+	for(int iv=0; iv < g.length ;iv++)
 	    {
 		System.out.println("Matrix " + iv);
 		g[iv].printmatrix() ;
@@ -741,19 +780,31 @@ public class generate_gauge {
 }
 
 
-  /* This subroutine calculates a vector of matrices interacting with
-     with links using Wilson action.  The lattice is in lat and the
-     result is placed in st.  The first three matrix vectors mtemp[0],
-     mtemp[1], and mtemp[2], are used; so st should not be there and these
-     shouldn't be used until after staple is done.  
-     links and sites labeled as
 
-     2--link2--x
-     link3     link1
-     0--link --1
-     link6     link4
-     5--link5--4
-  */
+/**
+ * Compute the staple of gauge fields
+ *
+ *
+ * This subroutine calculates a vector of matrices interacting with
+ *   with links using Wilson action.  The lattice is in lat and the
+ *    result is placed in st.  The first three matrix vectors mtemp[0],
+ *    mtemp[1], and mtemp[2], are used; so st should not be there and these
+ *    shouldn't be used until after staple is done.  
+ *    links and sites labeled as
+ *
+ *    2--link2--x
+ *    link3     link1
+ *    0--link --1
+ *    link6     link4
+ *     5--link5--4
+ *
+ *
+ * @param  int link -- 
+ * @param  int site -- 
+ * @param  gaugefield[] latt configurations (direction and spacetime)
+ * @return gaugefield[] 
+ */
+
 
 
 public static gaugefield[] staple(gaugefield[] lat,int site,int link) 
@@ -868,7 +919,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
      */
     public static int siteindex(int[] x)
     {
-
 	int result=0;
 
 	for(int i=0;i<Global.DIM;i++)
@@ -893,10 +943,8 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 
     public static int ishift(int site_start, int dir, int dist)
     {
-	
-	int i ;
 	int[] x = new int[Global.DIM];
-	for(i=0;i<Global.DIM;i++)
+	for(int i=0;i<Global.DIM;i++)
 	    x[i]=0;
 
 	x[dir]=dist;
@@ -930,7 +978,7 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 
 	int shift=nsites*gdir;
 	for(int iv=0;iv<vectorlength;iv++)
-	    g[iv]=lattice[myindex[iv]+shift];
+	    g[iv]=lattice[myindex[iv]+shift].copy() ;
 	
 
 	return g ;
@@ -957,33 +1005,30 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
  * @return double 
  */
 
-
-
     public static double metro(gaugefield[] old,gaugefield[] trial,double bias) 
     {
-	int iv;
-	double expdeltas=0.0,temp;
-	
+	double expdeltas = 0.0 ;
 
-	for(iv=0;iv<vectorlength;iv++)
+	for(int iv=0;iv<vectorlength;iv++)
 	    {
-		temp=  Math.exp((bias*(snew[iv]-sold[iv])));
-		expdeltas=expdeltas+temp;
+		double temp =  Math.exp((bias*(snew[iv]-sold[iv])));
+		expdeltas += temp;
 		
-		// this is a big hack from the c++ cpde
 		if(generator.nextDouble()  < temp)
 		    accepted[iv] = 1 ;
 		else
 		    accepted[iv] = 0 ;
 		
-	    }
-	/* Accept changes */
+		//		System.out.printf("DEBUG Accepted[%d] = %d\n",iv, accepted[iv]);
+		//		System.out.printf("DEBUG tmp = %g Accepted[%d] = %d\n",temp, iv, accepted[iv]);
 
-	for(iv=0;iv<vectorlength;iv++)
+	    }
+
+	for(int iv=0 ; iv<vectorlength ; iv++)
 	    if (accepted[iv] != 0 ) 
 		{
-		    sold[iv]=snew[iv];
-		    old[iv]=trial[iv];
+		    sold[iv] = snew[iv] ;
+		    old[iv]  = trial[iv].copy()  ;
 		}
 
 
@@ -1087,6 +1132,10 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 	return result;
     }
 
+    //
+    //  DEBUG routines
+    //
+
 
     public static void debug_init(int [] shift)
     {
@@ -1107,11 +1156,29 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
     // variables in the class
     //
 
+/**
+ * Description of the variable here.
+ */
     public static int N ;
 
+/**
+ * Description of the variable here.
+ */
     public static int nsites ;
+
+/**
+ * Description of the variable here.
+ */
     public static int nlinks ; 
+
+/**
+ * Description of the variable here.
+ */
     public static int nplaquettes ;
+
+/**
+ * Description of the variable here.
+ */
     public static int vectorlength; 
 
 
@@ -1124,9 +1191,19 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 
     public static int[] shift ;
 
-    public static gaugefield[] ulinks; /* for the main lattice */
+/**
+ * The gauge configurations as a one dimensional array
+ */
+    public static gaugefield[] ulinks; 
 
+/**
+ * A vector of random matrices
+ */
     public static gaugefield[] table1 ;
+
+/**
+ * A vector of random matrices
+ */
     public static gaugefield[] table2 ;
 
     public static gaugefield[] mtemp0 ;
@@ -1135,6 +1212,9 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
     public static gaugefield[] mtemp3 ;
     public static gaugefield[] mtemp4 ;
 
-    // Random number generator 
+/**
+ * Random number generator 
+ */
     private static Random generator ;
+
 }

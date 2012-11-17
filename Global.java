@@ -10,10 +10,7 @@ public class Global {
      */
     public static int DIM   = 4;
 
-/**
- * Description of the variable here.
- */
-//    public static int SIZE = 8 ;
+
 
 /**
  * Beta value -- a parameter in the Wilson action

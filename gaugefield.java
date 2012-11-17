@@ -152,6 +152,28 @@ public class gaugefield
 
 
 
+
+    public void set_diag(double re, double im)
+    {
+
+
+	for (int i=0;i<N;i++)
+	    for (int j=0;j<N;j++)
+		{
+		    real[i][j] = 0.0 ; 
+		    imag[i][j] = 0.0 ;
+		}
+
+	for (int i=0;i<N;i++)
+	    {
+		real[i][i] = re ; 
+		imag[i][i] = im ;
+	    }
+    
+    }
+
+
+
     public void set_unit()
     {
 	int i,j;
@@ -176,7 +198,7 @@ public class gaugefield
 
 	int i ;
 	for (i=0;i<N;i++)
-	    ans += imag[i][i]  ;
+	    ans += real[i][i]  ;
 
 	return ans ;
 
