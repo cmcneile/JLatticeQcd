@@ -66,12 +66,7 @@ public class generate_gauge {
 		int count=0;
 		for (int i=0 ; i < sweeps_between_meas ; i++) 
 		    {
-			//			System.out.println("DEBUG Sweep number " + i);
 			monte(ulinks);
-
-			//			check_unitarity(ulinks) ;
-			// System.exit(0) ;
-
 			count++; 
 		    }
 		check_unitarity_norm(ulinks) ; // System.exit(0) ; 
@@ -246,15 +241,6 @@ public class generate_gauge {
 	vgroup(table2);
 
 	check_unitarity_norm(table2) ; // System.exit(0) ;
-
-	//System.out.println("DEBUG Table 1");
-	//dump_matrix(table1) ;
-
-	//System.out.println("DEBUG Table 2");
-	//dump_matrix(table2) ;
-
-	//	System.exit(0) ;
-	
 	/* update table a few times */
 	for (int i=0;i<50;i++)
 	    {
@@ -330,23 +316,10 @@ public class generate_gauge {
 	/* multiply table 2 by a into table 1 for trial change */
 	table1 =  vprod(table2 , mtemp0 );
 
-	//System.out.println("DEBUG Table 1"); 
-	//dump_matrix(table1) ; 
-
-	//System.out.println("DEBUG Table 2"); 
-	//dump_matrix(table2) ; 
-	//System.exit(0) ;  
-
 	/* metropolis select new table 2 */
 	sold =  vtrace(table2);
 	snew =  vtrace(table1);
 
-	// for(int ii=0 ; ii < snew.length ; ++ii)
-	//    {
-	//	System.out.println("DEBUG old,new " + ii + " " + sold[ii] + " " + snew[ii] ); 
-	//    } 
-
-	//	System.exit(0) ;  
 	metro(table2,table1,6*Global.beta/N);  
 
 	/* switch table 1 and 2 */
@@ -377,19 +350,15 @@ public class generate_gauge {
 	    }	
 
 
-	//	int index = generator.nextInt(vectorlength) + 1 ;
 	int index = generator.nextInt(vectorlength)  ;
 
-	//		System.out.println("DEBUG random index = " + index);
 
 	/* the random inversion from ranmat is important! */
-
 	for(int iv=0;iv<vectorlength;iv++)
 	    {
 		if (index>=vectorlength) index-=vectorlength;
 		
 		double rr = generator.nextDouble();
-		//		System.out.println("DEBUG random = " + rr);
 		
 		if( rr < 0.5 )
 		    g[iv]=table1[index].copy() ;
@@ -1033,9 +1002,6 @@ public static gaugefield[] staple(gaugefield[] lat,int site,int link)
 		else
 		    accepted[iv] = 0 ;
 		
-		//		System.out.printf("DEBUG Accepted[%d] = %d\n",iv, accepted[iv]);
-		//		System.out.printf("DEBUG tmp = %g Accepted[%d] = %d\n",temp, iv, accepted[iv]);
-
 	    }
 
 	for(int iv=0 ; iv<vectorlength ; iv++)

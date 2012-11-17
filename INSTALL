@@ -17,4 +17,5 @@ and then to run with
 
 java   generate_gauge
 
-
+The code now reads some parameters from the input_param.xml
+file.
