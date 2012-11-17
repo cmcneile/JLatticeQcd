@@ -1,0 +1,11 @@
+JLatticeQcd
+-----------
+
+This is simple code to generate quenched gauge configurations
+with a java code. The aim is write something for outreach.
+
+I started from the c++ code written by Mike Creutz.
+http://latticeguy.net/
+
+
+Craig McNeile

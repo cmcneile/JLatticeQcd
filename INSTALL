@@ -1,0 +1,21 @@
+The build system uses ant (http://ant.apache.org/manual/Tasks/java.html).
+
+The following commands will compile and run the code.
+
+ant compile
+ant jar
+ant run
+
+
+See the file build.xml
+
+I am actually still finding it easier to compile with
+
+javac generate_gauge.java
+
+and then to run with 
+
+java   generate_gauge
+
+The code now reads some parameters from the input_param.xml
+file.
