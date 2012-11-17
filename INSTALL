@@ -9,4 +9,12 @@ ant run
 
 See the file build.xml
 
+I am actually still finding it easier to compile with
+
+javac generate_gauge.java
+
+and then to run with 
+
+java   generate_gauge
+
 

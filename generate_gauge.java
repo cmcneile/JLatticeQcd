@@ -12,15 +12,29 @@
 
 import java.util.Random;
 
+import java.io.IOException;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+import javax.xml.parsers.*;
+import javax.xml.xpath.*;
+
 
 public class generate_gauge {
 
     public static void main(String[] argv)
+	throws ParserConfigurationException, SAXException, 
+	       IOException, XPathExpressionException
     {
 
 	//	int a , b , c ; 
 	int sweeps_between_meas = 5 ;
 	int max_sweeps = 50 ; 
+
+
+	readparam param_file = new readparam()  ;
+
+	String xpath_want = "//pure_gauge_params/algorithm_param/max_sweeps/text()" ;
+	max_sweeps = param_file.read_int(xpath_want) ;
 
 	N = Global.GROUP ; 
 

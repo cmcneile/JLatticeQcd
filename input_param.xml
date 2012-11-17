@@ -1,0 +1,13 @@
+<pure_gauge_params>
+
+<action_param>
+ <N>2</N>
+</action_param>
+
+
+<algorithm_param>
+<max_sweeps>20</max_sweeps>
+</algorithm_param>
+
+ 
+</pure_gauge_params>
